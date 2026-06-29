@@ -1838,29 +1838,38 @@ small {
     display:flex;
     align-items:center;
     width:100%;
-    height:52px;
-    background:#101010;
-    border-top:2px solid #d60000;
-    border-bottom:2px solid #d60000;
+    min-height:58px;
+    padding:7px;
+    background:
+        linear-gradient(135deg, #210000 0%, #5c0707 48%, #111827 100%);
+    border:1px solid rgba(255, 42, 42, 0.45);
+    border-left:5px solid #ffbf00;
+    border-radius:8px;
+    box-shadow:0 14px 32px rgba(92, 7, 7, 0.22);
     font-family:Arial,sans-serif;
     overflow:hidden;
+    gap:8px;
 }
 
 /* LEFT LABEL */
 
 .ticker-label{
     flex-shrink:0;
-    width:180px;
-    height:100%;
+    width:168px;
+    min-height:42px;
     display:flex;
     align-items:center;
     justify-content:center;
-    background:#d60000;
+    background:linear-gradient(135deg, #ff1f1f 0%, #b90000 100%);
     color:#fff;
-    font-size:15px;
-    font-weight:700;
+    border:1px solid rgba(255, 255, 255, 0.22);
+    border-radius:999px;
+    font-size:14px;
+    font-weight:900;
     letter-spacing:.5px;
-    animation:flash 1s infinite;
+    text-transform:uppercase;
+    box-shadow:0 0 0 3px rgba(255, 255, 255, 0.08), 0 0 22px rgba(255, 0, 0, 0.35);
+    animation:flash 1.15s infinite;
 }
 
 /* MESSAGE BOX */
@@ -1868,12 +1877,14 @@ small {
 .ticker-wrap{
     flex:1;
     overflow:hidden;
-    margin:6px 10px;
-    background:#fff;
-    border:1px solid #d9d9d9;
-    height:38px;
+    margin:0;
+    background:rgba(255, 255, 255, 0.96);
+    border:1px solid rgba(255, 255, 255, 0.72);
+    border-radius:999px;
+    height:42px;
     display:flex;
     align-items:center;
+    box-shadow:inset 0 0 0 1px rgba(15, 33, 55, 0.06);
 }
 
 /* MOVING TEXT */
@@ -1883,15 +1894,16 @@ small {
     align-items:center;
     white-space:nowrap;
     width:max-content;
-    animation:ticker 30s linear infinite;
+    animation:ticker 34s linear infinite;
 }
 
 .ticker-text span{
     display:inline-block;
-    padding-right:120px;
-    color:#222;
+    padding-right:140px;
+    color:#7f1d1d;
     font-size:15px;
-    font-weight:600;
+    font-weight:800;
+    letter-spacing:0;
 }
 
 /* Hover पर रुक जाएगा */
@@ -1919,11 +1931,11 @@ small {
 @keyframes flash{
 
     0%,100%{
-        background:#d60000;
+        filter:brightness(1);
     }
 
     50%{
-        background:#ff2b2b;
+        filter:brightness(1.28);
     }
 
 }
@@ -1933,24 +1945,56 @@ small {
 @media(max-width:768px){
 
     .fraud-ticker{
-        height:48px;
+        min-height:46px;
+        padding:5px;
+        gap:6px;
+        border-left-width:4px;
     }
 
     .ticker-label{
-        width:140px;
-        font-size:13px;
+        width:112px;
+        min-height:34px;
+        font-size:11px;
+        letter-spacing:.2px;
     }
 
     .ticker-wrap{
         height:34px;
-        margin:5px;
     }
 
     .ticker-text span{
-        font-size:13px;
-        padding-right:80px;
+        font-size:12px;
+        padding-right:70px;
     }
 
+}
+
+@media(max-width:420px){
+    .fraud-ticker{
+        align-items:stretch;
+    }
+
+    .ticker-label{
+        width:86px;
+        min-height:32px;
+        font-size:10px;
+        line-height:1.1;
+        padding:0 6px;
+        text-align:center;
+    }
+
+    .ticker-wrap{
+        height:32px;
+    }
+
+    .ticker-text{
+        animation-duration:38s;
+    }
+
+    .ticker-text span{
+        font-size:11px;
+        padding-right:48px;
+    }
 }
 
 /* Home page and RTPS Counter mobile responsiveness only */
