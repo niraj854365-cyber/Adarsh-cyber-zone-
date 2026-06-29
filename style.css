@@ -1835,6 +1835,7 @@ small {
 ========================== */
 
 .fraud-ticker{
+    position:relative;
     display:flex;
     align-items:center;
     width:100%;
@@ -1893,6 +1894,12 @@ small {
     text-shadow:0 1px 3px rgba(0, 0, 0, 0.38);
     box-shadow:0 0 0 3px rgba(255, 191, 0, 0.14), 0 0 24px rgba(255, 71, 0, 0.44);
     animation:dangerPulse .9s infinite;
+}
+
+.portal-grid-callbar{
+    display:flex;
+    justify-content:flex-end;
+    padding:8px clamp(16px, 3vw, 28px) 0;
 }
 
 .ticker-call-btn:hover{
