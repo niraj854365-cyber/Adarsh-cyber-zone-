@@ -1952,3 +1952,130 @@ small {
     }
 
 }
+
+/* Home page and RTPS Counter mobile responsiveness only */
+@media (max-width: 768px) {
+    body:has(.hero-side) .top-header,
+    body:has(.portal-grid) .top-header {
+        align-items: center;
+    }
+
+    body:has(.hero-side) .home-header-info,
+    body:has(.portal-grid) .home-header-info {
+        width: 100%;
+        max-width: none;
+        margin-left: 0;
+        text-align: center;
+        font-size: 12px;
+        line-height: 1.35;
+    }
+
+    body:has(.hero-side) .hero {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    body:has(.hero-side) .hero-panel {
+        padding: 18px;
+    }
+
+    body:has(.hero-side) .hero-panel h2 {
+        font-size: clamp(22px, 7vw, 32px);
+        line-height: 1.18;
+    }
+
+    body:has(.hero-side) .hero-panel p,
+    body:has(.hero-side) .lead,
+    body:has(.portal-grid) .lead {
+        font-size: 15px;
+        line-height: 1.55;
+        overflow-wrap: anywhere;
+    }
+
+    body:has(.hero-side) .hero-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    body:has(.hero-side) .hero-actions .btn {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+
+    body:has(.hero-side) .hero-side {
+        padding: 12px;
+    }
+
+    body:has(.hero-side) .metric {
+        padding: 14px;
+        overflow-wrap: anywhere;
+    }
+
+    body:has(.hero-side) .metric strong {
+        font-size: 20px;
+    }
+
+    body:has(.hero-side) .metric .btn {
+        width: 100%;
+        margin-top: 8px;
+        justify-content: center;
+    }
+
+    body:has(.hero-side) .section-grid,
+    body:has(.portal-grid) .section-grid {
+        grid-template-columns: 1fr;
+    }
+
+    body:has(.portal-grid) .portal-grid {
+        grid-template-columns: 1fr;
+        padding: 14px;
+        gap: 14px;
+    }
+
+    body:has(.portal-grid) .portal-grid h3,
+    body:has(.portal-grid) .portal-grid li,
+    body:has(.portal-grid) .notice {
+        overflow-wrap: anywhere;
+    }
+
+    body:has(.portal-grid) .rtps-quick-actions {
+        gap: 6px;
+    }
+
+    body:has(.portal-grid) .rtps-quick-actions a {
+        flex: 1 1 calc(50% - 6px);
+        justify-content: center;
+        min-width: 130px;
+        text-align: center;
+    }
+
+    body:has(.portal-grid) .payment-box {
+        height: auto;
+        padding: 16px;
+    }
+
+    body:has(.portal-grid) .qr-box {
+        width: min(220px, 100%);
+    }
+}
+
+@media (max-width: 420px) {
+    body:has(.hero-side) .home-header-info,
+    body:has(.portal-grid) .home-header-info {
+        font-size: 11px;
+    }
+
+    body:has(.hero-side) .hero-panel,
+    body:has(.portal-grid) .portal-grid {
+        padding: 12px;
+    }
+
+    body:has(.portal-grid) .rtps-quick-actions a {
+        flex-basis: 100%;
+    }
+
+    body:has(.portal-grid) .steps {
+        padding-left: 18px;
+    }
+}
