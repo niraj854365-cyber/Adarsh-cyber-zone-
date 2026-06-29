@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registration Successful - Adarsh Cyber Zone</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="success-page">
+<main class="success-wrap">
+    <section class="success-panel">
+        <h1>Registration Successful</h1>
+        <div class="success-reg-number" id="successRegNo">ACZ0000000</div>
+        <div class="button-row">
+            <button type="button" class="btn btn-green" onclick="printReceipt()">Print Receipt</button>
+            <button type="button" class="btn btn-light" onclick="closeSuccessPage()">Close</button>
+        </div>
+    </section>
+</main>
+<script src="script.js"></script>
+<script>
+function getSuccessRegNo() {
+    const params = new URLSearchParams(location.search);
+    return params.get("regNo") || sessionStorage.getItem("last_success_reg_no") || "ACZ0000000";
+}
+
+function printReceipt() {
+    const regNo = getSuccessRegNo();
+    const receipt = sessionStorage.getItem("last_registration_receipt") ||
+        `<div style="font-family:Arial;padding:24px"><h1>Adarsh Cyber Zone</h1><h2>Registration Receipt</h2><p><strong>Registration No:</strong> ${escapeHtml(regNo)}</p></div>`;
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`<!DOCTYPE html><html><head><title>${escapeHtml(regNo)}</title></head><body>${receipt}<script>window.onload=()=>{window.print();window.close();}<\/script></body></html>`);
+    printWindow.document.close();
+}
+
+function closeSuccessPage() {
+    window.close();
+    setTimeout(() => {
+        location.href = "index.html";
+    }, 250);
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    $("successRegNo").textContent = getSuccessRegNo();
+});
+</script>
+</body>
+</html>

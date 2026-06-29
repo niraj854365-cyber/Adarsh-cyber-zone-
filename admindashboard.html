@@ -1,0 +1,494 @@
+﻿<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - Adarsh Cyber Zone</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top-header">
+    <img src="logo.png" alt="Adarsh Cyber Zone Logo">
+    <div>
+        <h1 class="brand-title">आदर्श साइबर ज़ोन & ग्राहक सेवा केन्द्र</h1>
+        <p class="brand-subtitle">CSC, RTPS, Digital Services और Online Form Support</p>
+    </div>
+    <div class="home-header-info">
+        <span><span class="header-mini-icon"></span>📞 हेल्पलाइन नंबर : 9315906342, 9155901766</span>
+        <span><span class="header-mini-icon"></span>📧 Email : niraj854365@gmail.com</span>
+        <span><span class="header-mini-icon"></span>🕒 Timing: 9:00 AM – 6:00 PM</span>
+        <span><span class="header-mini-icon"></span>📅 Working Days: Mon – Sat.</span>
+        
+    </div>
+</header>
+<nav class="admin-nav">
+    <a href="admindashboard.html">Admin Dashboard</a>
+    <button type="button" onclick="viewAdminCredentials()">View ID Password</button>
+    <button type="button" onclick="editAdminCredentials()">Edit ID Password</button>
+    <a href="adminlogin.html" onclick="return logoutAdmin()">Logout</a>
+</nav>
+
+<main class="container">
+    <section class="card">
+        <h2>Admin Dashboard</h2>
+        <div id="adminMsg"></div>
+        <div class="admin-filter-row">
+            <select id="statusFilter" class="filter-select" onchange="applyFilter(true)" aria-label="Filter users by status">
+                <option value="ALL">Filter: All</option>
+                <option value="PENDING">Pending</option>
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
+            </select>
+        </div>
+        <div class="admin-toolbar">
+            <input type="text" id="searchReg" placeholder="Search Reg No, name, mobile" oninput="applyFilter()">
+            <button class="btn btn-green" onclick="loadUsers(event)">Refresh</button>
+        </div>
+        <div class="table-wrap">
+            <table class="data-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>Reg No</th>
+                        <th>Name</th>
+                        <th>DOB</th>
+                        <th>Mobile</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr><td colspan="6">Loading users...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="view-more-row" id="viewMoreRow"></div>
+    </section>
+
+    <section class="card" id="adminDetailsPanel" style="margin-top:16px"></section>
+</main>
+
+<footer class="site-footer">&copy; 2026 Adarsh Cyber Zone</footer>
+<script src="script.js"></script>
+<script>
+let allUsers = [];
+let filteredUsers = [];
+let visibleUserCount = 10;
+let selectedUser = null;
+let selectedCertificates = [];
+
+const USER_EDIT_FIELDS = [
+    ["ApplicantNmaeEng", "Applicant Name (English)", "text"],
+    ["ApplicantNmaeHindi", "Applicant Name (Hindi)", "text"],
+    ["FatherNameEng", "Father Name (English)", "text"],
+    ["FatherNameHindi", "Father Name (Hindi)", "text"],
+    ["MotherNameEng", "Mother Name (English)", "text"],
+    ["MotherNameHindi", "Mother Name (Hindi)", "text"],
+    ["HusbandNameEng", "Husband Name (English)", "text"],
+    ["HusbandNameHindi", "Husband Name (Hindi)", "text"],
+    ["MaritalStatus", "Marital Status", "text"],
+    ["DOB", "DOB", "text"],
+    ["Gender", "Gender", "text"],
+    ["CasteCategory", "Caste Category", "text"],
+    ["CasteName", "Caste Name", "text"],
+    ["Profession", "Profession", "text"],
+    ["TotalAnnualIncome", "Total Annual Income", "text"],
+    ["MobileNumber", "Mobile Number", "text"],
+    ["Email", "Email", "email"],
+    ["FullPresentAddress", "Present Address", "textarea"],
+    ["FullPermanentAddress", "Permanent Address", "textarea"]
+];
+
+function valueFrom(obj, ...keys) {
+    for (const key of keys) if (obj?.[key]) return obj[key];
+    return "";
+}
+
+function userRegNo(user) {
+    return valueFrom(user, "regNo", "RegNo");
+}
+
+function userName(user) {
+    return valueFrom(user, "ApplicantNmaeEng", "ApplicantNameEng");
+}
+
+function displayDob(value) {
+    return formatDate(value);
+}
+
+function profileRows(user) {
+    return [
+        ["Reg No", userRegNo(user)],
+        ["Applicant Name (English)", userName(user)],
+        ["Applicant Name (Hindi)", user.ApplicantNmaeHindi || user.ApplicantNameHindi],
+        ["Father Name (English)", user.FatherNameEng],
+        ["Father Name (Hindi)", user.FatherNameHindi],
+        ["Mother Name (English)", user.MotherNameEng],
+        ["Mother Name (Hindi)", user.MotherNameHindi],
+        ["Husband Name (English)", user.HusbandNameEng],
+        ["Husband Name (Hindi)", user.HusbandNameHindi],
+        ["Marital Status", user.MaritalStatus],
+        ["DOB", displayDob(user.DOB)],
+        ["Gender", user.Gender],
+        ["Caste Category", user.CasteCategory],
+        ["Caste Name", user.CasteName],
+        ["Profession", user.Profession],
+        ["Total Annual Income", user.TotalAnnualIncome],
+        ["Mobile Number", user.MobileNumber],
+        ["Email", user.Email],
+        ["Present Address", user.FullPresentAddress],
+        ["Permanent Address", user.FullPermanentAddress],
+        ["Photo", user.PhotoLink],
+        ["Signature", user.SignatureLink],
+        ["Aadhaar", user.AadhaarLink],
+        ["Other Document", user.OtherDocumentLink],
+        ["Status", user.Status || "PENDING"]
+    ];
+}
+
+function printableRows(user) {
+    return profileRows(user).filter(([label]) => !["Photo", "Signature", "Aadhaar", "Other Document"].includes(label));
+}
+
+async function loadUsers(event) {
+    const restore = event?.target ? setButtonLoading(event.target, "Loading...") : () => {};
+    const result = await sendRequest({ action: "getAllUsers" });
+    restore();
+    if (result.success && Array.isArray(result.users)) {
+        allUsers = [...result.users].reverse();
+        applyFilter(true);
+        showMessage("adminMsg", `${allUsers.length} users loaded.`, false);
+    } else {
+        $("usersTableBody").innerHTML = `<tr><td colspan="6">${escapeHtml(result.message || "Users load failed.")}</td></tr>`;
+    }
+}
+
+function applyFilter(resetVisible = true) {
+    if (resetVisible) visibleUserCount = 10;
+    const search = $("searchReg").value.trim().toUpperCase();
+    const statusFilter = $("statusFilter")?.value || "ALL";
+    filteredUsers = allUsers.filter((user) => {
+        const status = String(user.Status || "PENDING").toUpperCase();
+        const haystack = `${userRegNo(user)} ${userName(user)} ${user.MobileNumber || ""} ${user.Status || ""}`.toUpperCase();
+        const matchesSearch = !search || haystack.includes(search);
+        const matchesStatus = statusFilter === "ALL" || status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
+    renderUsersTable(filteredUsers.slice(0, visibleUserCount));
+    renderViewMore();
+}
+
+function renderViewMore() {
+    const row = $("viewMoreRow");
+    if (!row) return;
+    if (filteredUsers.length > visibleUserCount) {
+        row.innerHTML = `<button type="button" class="btn btn-light view-more-btn" onclick="viewMoreUsers()">VIEW MORE</button>`;
+    } else {
+        row.innerHTML = "";
+    }
+}
+
+function viewMoreUsers() {
+    visibleUserCount += 10;
+    renderUsersTable(filteredUsers.slice(0, visibleUserCount));
+    renderViewMore();
+}
+
+function renderUsersTable(users) {
+    if (!users.length) {
+        $("usersTableBody").innerHTML = '<tr><td colspan="6">No users found.</td></tr>';
+        return;
+    }
+    $("usersTableBody").innerHTML = users.map((user) => {
+        const regNo = userRegNo(user);
+        const currentStatus = String(user.Status || "PENDING").toUpperCase();
+        return `
+            <tr>
+                <td>${escapeHtml(regNo)}</td>
+                <td>${escapeHtml(userName(user) || "-")}</td>
+                <td>${escapeHtml(displayDob(user.DOB))}</td>
+                <td>${escapeHtml(user.MobileNumber || "-")}</td>
+                <td><span class="status-badge ${escapeHtml(String(user.Status || "PENDING").toLowerCase())}">${escapeHtml(user.Status || "PENDING")}</span></td>
+                <td class="table-actions">
+                    <button class="btn btn-blue" onclick="viewUser('${escapeHtml(regNo)}')">View</button>
+                    <button class="btn btn-green" onclick="editUser('${escapeHtml(regNo)}')">Edit</button>
+                    <select id="status-${escapeHtml(regNo)}" class="status-select" aria-label="Select status for ${escapeHtml(regNo)}" onchange="updateUserStatusFromSelect('${escapeHtml(regNo)}', this)">
+                        <option value="PENDING" ${currentStatus === "PENDING" ? "selected" : ""}>Pending</option>
+                        <option value="ACTIVE" ${currentStatus === "ACTIVE" ? "selected" : ""}>Active</option>
+                        <option value="INACTIVE" ${currentStatus === "INACTIVE" ? "selected" : ""}>Inactive</option>
+                    </select>
+                    <button class="btn btn-light" onclick="printUserReceipt('${escapeHtml(regNo)}')">Print Receipt</button>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+async function selectUser(regNo) {
+    selectedUser = allUsers.find((user) => userRegNo(user) === regNo);
+    if (!selectedUser) return false;
+    const certResult = await sendRequest({ action: "getCertificates", regNo, RegNo: regNo });
+    selectedCertificates = certResult.success && Array.isArray(certResult.certificates) ? certResult.certificates : [];
+    return true;
+}
+
+async function viewUser(regNo) {
+    if (!window.confirm("Do you want to view this user?")) return;
+    if (!await selectUser(regNo)) return;
+    renderUserView();
+}
+
+function renderUserView() {
+    $("adminDetailsPanel").innerHTML = `
+        <div class="panel-head">
+            <h2>User Full Details</h2>
+        </div>
+        <div class="profile-box">${profileRows(selectedUser).map(([label, value]) => profileRow(label, value)).join("")}</div>
+        ${certificateManagerHtml()}
+        <div class="button-row bottom-close-row">
+            <button class="btn btn-light" onclick="closeAdminPanel()">Close</button>
+        </div>
+    `;
+}
+
+function profileRow(label, value) {
+    const isLink = /^https?:\/\//.test(String(value || ""));
+    return `<div class="profile-row"><div class="profile-label">${escapeHtml(label)}</div><div class="profile-value">${isLink ? `<button type="button" class="btn btn-blue" onclick="downloadEncodedDriveFile('${encodeURIComponent(value)}', '${escapeHtml(label)}')">⬇ Download</button>` : escapeHtml(value || "-")}</div></div>`;
+}
+
+async function editUser(regNo) {
+    if (!window.confirm("Do you want to edit this user?")) return;
+    if (!await selectUser(regNo)) return;
+    renderEditUser();
+}
+
+function editControl([key, label, type]) {
+    const value = key === "DOB" ? displayDob(selectedUser[key]) : selectedUser[key];
+    if (type === "textarea") {
+        return `<div class="form-group full-span"><label for="edit-${key}">${escapeHtml(label)}</label><textarea id="edit-${key}" data-key="${key}">${escapeHtml(value || "")}</textarea></div>`;
+    }
+    return `<div class="form-group"><label for="edit-${key}">${escapeHtml(label)}</label><input type="${type}" id="edit-${key}" data-key="${key}" value="${escapeHtml(value || "")}"></div>`;
+}
+
+function renderEditUser() {
+    $("adminDetailsPanel").innerHTML = `
+        <div class="panel-head">
+            <h2>Edit User</h2>
+        </div>
+        <form id="adminEditUserForm">
+            <div class="form-grid">
+                ${USER_EDIT_FIELDS.map(editControl).join("")}
+            </div>
+            <div class="button-row">
+                <button class="btn btn-green" type="submit">Save User</button>
+                <button class="btn btn-light" type="button" onclick="closeAdminPanel()">Close</button>
+            </div>
+        </form>
+    `;
+    autoDOB("edit-DOB");
+    onlyDigits("edit-MobileNumber", 10);
+    onlyDigits("edit-TotalAnnualIncome", 8);
+    $("adminEditUserForm").addEventListener("submit", saveAdminUser);
+}
+
+function inputField(id, label, value) {
+    return `<div class="form-group"><label for="${id}">${escapeHtml(label)}</label><input type="text" id="${id}" value="${escapeHtml(value || "")}"></div>`;
+}
+
+async function saveAdminUser(event) {
+    event.preventDefault();
+    if (!selectedUser || !window.confirm("Do you want to save this user?")) return;
+    const regNo = userRegNo(selectedUser);
+    const data = {
+        action: "adminUpdateUser",
+        RegNo: regNo,
+        regNo
+    };
+    USER_EDIT_FIELDS.forEach(([key]) => {
+        const field = $(`edit-${key}`);
+        if (!field) return;
+        data[key] = key === "DOB" ? formatDate(field.value.trim()) : field.value.trim();
+    });
+    data.ApplicantNameEng = data.ApplicantNmaeEng;
+    const result = await sendRequest(data);
+    if (result.success) {
+        window.alert("User updated successfully.");
+        await loadUsers();
+        await selectUser(regNo);
+        renderUserView();
+    } else {
+        showMessage("adminMsg", result.message || "User update failed.", true);
+    }
+}
+
+async function updateUserStatusFromSelect(regNo, selectEl) {
+    const user = allUsers.find((item) => userRegNo(item) === regNo);
+    if (!user) return;
+    const previousStatus = String(user.Status || "PENDING").toUpperCase();
+    const status = selectEl?.value || $(`status-${regNo}`)?.value || "ACTIVE";
+    if (status === previousStatus) return;
+    if (!window.confirm(`Do you want to set status ${status}?`)) {
+        if (selectEl) selectEl.value = ["ACTIVE", "INACTIVE", "PENDING"].includes(previousStatus) ? previousStatus : "PENDING";
+        return;
+    }
+    const result = await sendRequest({ action: "updateStatus", RegNo: regNo, regNo, Status: status, status });
+    if (result.success) {
+        user.Status = status;
+        applyFilter(false);
+        window.alert(`Status updated to ${status}.`);
+    } else {
+        if (selectEl) selectEl.value = ["ACTIVE", "INACTIVE", "PENDING"].includes(previousStatus) ? previousStatus : "PENDING";
+        showMessage("adminMsg", result.message || "Status update failed.", true);
+    }
+}
+
+async function printUserReceipt(regNo) {
+    if (!window.confirm("Do you want to download receipt PDF?")) return;
+    const user = allUsers.find((item) => userRegNo(item) === regNo);
+    if (!user) return;
+    await downloadReceiptPdf("User Receipt", `${regNo}_Receipt.pdf`, printableRows(user), "adminMsg");
+}
+
+function certificateManagerHtml() {
+    return `
+        <div class="notice">
+            <strong>Upload Certificate / Receipt</strong>
+            <label for="certName" style="margin-top:10px">Document Name</label>
+            <input type="text" id="certName" placeholder="Document name">
+            <label for="certFile" style="margin-top:10px">Document File</label>
+            <input type="file" id="certFile" accept=".pdf,.jpg,.jpeg,.png">
+            <button class="btn btn-green full-btn" style="margin-top:12px" onclick="uploadCertificate(event)">Upload</button>
+        </div>
+        <h3 style="margin-top:16px">Existing Documents</h3>
+        <div class="table-wrap">${documentsTableHtml()}</div>
+    `;
+}
+
+function documentsTableHtml() {
+    if (!selectedCertificates.length) return '<div class="document-empty">No documents uploaded yet.</div>';
+    const docs = [...selectedCertificates].reverse();
+    return `
+        <table class="data-table">
+            <thead><tr><th>Document Name</th><th>Upload Date</th><th>Download</th><th>Action</th></tr></thead>
+            <tbody>
+                ${docs.map((cert) => {
+                    const link = cert.CertificateLink || cert.certificateLink || cert.fileUrl || "#";
+                    return `<tr>
+                        <td>${escapeHtml(cert.CertificateName || cert.certificateName || "Document")}</td>
+                        <td>${escapeHtml(cert.UploadDate || cert.uploadDate || "-")}</td>
+                        <td><button type="button" class="btn btn-blue" title="Download" onclick="downloadEncodedDriveFile('${encodeURIComponent(link)}', '${escapeHtml(cert.CertificateName || cert.certificateName || "Document")}')">⬇</button></td>
+                        <td><button class="btn btn-red" onclick="deleteDocument('${escapeHtml(link)}')">Delete</button></td>
+                    </tr>`;
+                }).join("")}
+            </tbody>
+        </table>
+    `;
+}
+
+async function uploadCertificate(event) {
+    if (!selectedUser) return;
+    const certName = $("certName").value.trim();
+    const file = $("certFile").files[0];
+    if (!certName || !file) {
+        showMessage("adminMsg", "Document name aur file select karein.", true);
+        return;
+    }
+    if (!window.confirm("Do you want to upload this document?")) return;
+    const regNo = userRegNo(selectedUser);
+    const restore = setButtonLoading(event.target, "Uploading...");
+    const result = await sendRequest({
+        action: "uploadCertificate",
+        RegNo: regNo,
+        regNo,
+        CertificateName: certName,
+        certificateName: certName,
+        fileBase64: await fileToBase64(file),
+        fileName: file.name
+    });
+    restore();
+    if (result.success) {
+        await selectUser(regNo);
+        renderUserView();
+        window.alert("Document uploaded successfully.");
+    } else {
+        showMessage("adminMsg", result.message || "Upload failed.", true);
+    }
+}
+
+async function deleteDocument(link) {
+    if (!selectedUser || !window.confirm("Do you want to delete this document?")) return;
+    const regNo = userRegNo(selectedUser);
+    const result = await sendRequest({ action: "deleteCertificate", RegNo: regNo, regNo, CertificateLink: link, link });
+    if (result.success) {
+        await selectUser(regNo);
+        renderUserView();
+        window.alert("Document deleted successfully.");
+    } else {
+        showMessage("adminMsg", result.message || "Delete failed.", true);
+    }
+}
+
+async function viewAdminCredentials() {
+    if (!window.confirm("Do you want to view admin ID/password?")) return;
+    const result = await sendRequest({ action: "getAdmins" });
+    const admins = result.success && Array.isArray(result.admins) ? result.admins : [];
+    $("adminDetailsPanel").innerHTML = `
+        <div class="panel-head"><h2>Admin ID Password</h2><button class="btn btn-light" onclick="closeAdminPanel()">Close</button></div>
+        <div class="table-wrap">
+            <table class="data-table"><thead><tr><th>Admin ID</th><th>Password</th></tr></thead>
+            <tbody>${admins.map((admin) => `<tr><td>${escapeHtml(admin.AdminID || "")}</td><td>${escapeHtml(admin.Password || "")}</td></tr>`).join("") || '<tr><td colspan="2">No admin found.</td></tr>'}</tbody></table>
+        </div>
+    `;
+}
+
+async function editAdminCredentials() {
+    if (!window.confirm("Do you want to edit admin ID/password?")) return;
+    const result = await sendRequest({ action: "getAdmins" });
+    const admin = result.success && result.admins && result.admins[0] ? result.admins[0] : {};
+    $("adminDetailsPanel").innerHTML = `
+        <div class="panel-head"><h2>Edit Admin ID Password</h2><button class="btn btn-light" onclick="closeAdminPanel()">Close</button></div>
+        <form id="adminCredentialForm" class="auth-card">
+            ${inputField("adminIdEdit", "Admin ID", admin.AdminID || "")}
+            ${inputField("adminPasswordEdit", "Password", admin.Password || "")}
+            <div class="button-row"><button class="btn btn-green" type="submit">Save</button><button class="btn btn-light" type="button" onclick="closeAdminPanel()">Close</button></div>
+        </form>
+    `;
+    $("adminCredentialForm").addEventListener("submit", saveAdminCredentials);
+}
+
+async function saveAdminCredentials(event) {
+    event.preventDefault();
+    if (!window.confirm("Do you want to save admin credentials?")) return;
+    const result = await sendRequest({ action: "updateAdmin", AdminID: $("adminIdEdit").value.trim(), Password: $("adminPasswordEdit").value.trim() });
+    if (result.success) {
+        window.alert("Admin credentials updated.");
+        viewAdminCredentials();
+    } else {
+        showMessage("adminMsg", result.message || "Admin update failed.", true);
+    }
+}
+
+function closeAdminPanel() {
+    $("adminDetailsPanel").innerHTML = "";
+}
+
+function logoutAdmin() {
+    if (!window.confirm("Do you want to logout?")) return false;
+    localStorage.removeItem("adminLogged");
+    return true;
+}
+
+function closeAdminPanel() {
+    $("adminDetailsPanel").innerHTML = "";
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    if (!localStorage.getItem("adminLogged")) {
+        location.href = "adminlogin.html";
+        return;
+    }
+    closeAdminPanel();
+    loadUsers();
+});
+</script>
+</body>
+</html>

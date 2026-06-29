@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login - Adarsh Cyber Zone</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top-header">
+    <img src="logo.png" alt="Adarsh Cyber Zone Logo">
+    <div>
+        <h1 class="brand-title">आदर्श साइबर ज़ोन & ग्राहक सेवा केन्द्र</h1>
+        <p class="brand-subtitle">CSC, RTPS, Digital Services और Online Form Support</p>
+    </div>
+    <div class="home-header-info">
+        <span><span class="header-mini-icon"></span>📞 हेल्पलाइन नंबर : 9315906342, 9155901766</span>
+        <span><span class="header-mini-icon"></span>📧 Email : niraj854365@gmail.com</span>
+        <span><span class="header-mini-icon"></span>🕒 Timing: 9:00 AM – 6:00 PM</span>
+        <span><span class="header-mini-icon"></span>📅 Working Days: Mon – Sat.</span>
+        
+    </div>
+</header>
+
+<nav>
+    <a href="register.html">Register</a>
+    <a href="login.html">Login</a>
+    <a href="knowregno.html">Know Reg No</a>
+    <a href="adminlogin.html">Admin Login</a>
+    <a href="payment.html"> Fee Payment</a>
+</nav>
+
+<main class="container">
+    <section class="card auth-card">
+        <h2>Admin Login</h2>
+
+        <label for="adminID">Admin ID</label>
+        <input type="text" id="adminID" placeholder="Admin ID" autocomplete="username">
+
+        <label for="adminPass">Password</label>
+        <input type="password" id="adminPass" placeholder="Password" autocomplete="current-password">
+
+        <div class="button-row">
+            <button type="button" class="btn btn-green" onclick="adminLogin(event)">Login</button>
+            <a class="btn btn-light" href="rtpscounter.html">Back to RTPS Counter</a>
+        </div>
+        <div id="adminMsg"></div>
+    </section>
+</main>
+
+<div class="modal-bg" id="confirmModal">
+    <div class="modal-box">
+        <h3>Confirmation</h3>
+        <p id="confirmText">Do you want to continue?</p>
+        <div class="modal-actions">
+            <button class="modal-yes" onclick="confirmYes()">Yes</button>
+            <button class="modal-no" onclick="confirmNo()">No</button>
+        </div>
+    </div>
+</div>
+
+<footer class="site-footer">&copy; 2026 Adarsh Cyber Zone</footer>
+<script src="script.js"></script>
+<script>
+async function adminLogin(event) {
+    if (!window.confirm("Do you want to login as admin?")) return;
+    const adminID = $("adminID").value.trim();
+    const password = $("adminPass").value.trim();
+
+    if (!adminID || !password) {
+        showMessage("adminMsg", "Admin ID aur Password bharen.", true);
+        return;
+    }
+
+    const restore = setButtonLoading(event.target, "Processing...");
+    const result = await sendRequest({ action: "adminLogin", adminID, password, AdminID: adminID, Password: password });
+    restore();
+
+    if (result.success) {
+        localStorage.setItem("adminLogged", JSON.stringify({ adminID, loggedAt: new Date().toISOString() }));
+        location.href = "admindashboard.html";
+    } else {
+        showMessage("adminMsg", result.message || "Galat Admin ID ya Password.", true);
+    }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Know Registration No - Adarsh Cyber Zone</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top-header">
+    <img src="logo.png" alt="Adarsh Cyber Zone Logo">
+    <div>
+        <h1 class="brand-title">आदर्श साइबर ज़ोन & ग्राहक सेवा केन्द्र</h1>
+        <p class="brand-subtitle">CSC, RTPS, Digital Services और Online Form Support</p>
+    </div>
+    <div class="home-header-info">
+        <span><span class="header-mini-icon"></span>📞 हेल्पलाइन नंबर : 9315906342, 9155901766</span>
+        <span><span class="header-mini-icon"></span>📧 Email : niraj854365@gmail.com</span>
+        <span><span class="header-mini-icon"></span>🕒 Timing: 9:00 AM – 6:00 PM</span>
+        <span><span class="header-mini-icon"></span>📅 Working Days: Mon – Sat.</span>
+        
+    </div>
+</header>
+
+<nav>
+    <a href="register.html">Register</a>
+    <a href="login.html">Login</a>
+    <a href="knowregno.html">Know Reg No</a>
+    <a href="adminlogin.html">Admin Login</a>
+    <a href="payment.html"> Fee Payment</a>
+</nav>
+
+<main class="container">
+    <section class="card auth-card">
+        <h2>Know Registration No</h2>
+        <div class="notice">Registration form me diye gaye naam, father name aur DOB se record search karein.</div>
+
+        <label for="knowName">Applicant Name</label>
+        <input type="text" id="knowName" placeholder="FULL NAME" required>
+
+        <label for="knowFather">Father Name</label>
+        <input type="text" id="knowFather" placeholder="FATHER NAME" required>
+
+        <label for="knowDob">DOB (DD-MM-YYYY)</label>
+        <input type="text" id="knowDob" placeholder="DD-MM-YYYY" maxlength="10">
+
+        <div class="button-row">
+            <button type="button" class="btn btn-green" onclick="knowRegNo(event)">Find Reg No</button>
+            <a class="btn btn-light" href="rtpscounter.html">Back to RTPS Counter</a>
+        </div>
+        <div id="knowMsg"></div>
+
+    </section>
+</main>
+
+<div class="modal-bg" id="confirmModal">
+    <div class="modal-box">
+        <h3>Confirmation</h3>
+        <p id="confirmText">Do you want to continue?</p>
+        <div class="modal-actions">
+            <button class="modal-yes" onclick="confirmYes()">Yes</button>
+            <button class="modal-no" onclick="confirmNo()">No</button>
+        </div>
+    </div>
+</div>
+
+<footer class="site-footer">&copy; 2026 Adarsh Cyber Zone</footer>
+<script src="script.js"></script>
+<script>
+window.addEventListener("DOMContentLoaded", () => {
+    onlyCapsAndSpace("knowName");
+    onlyCapsAndSpace("knowFather");
+    autoDOB("knowDob");
+});
+</script>
+</body>
+</html>

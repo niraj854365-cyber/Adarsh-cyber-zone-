@@ -1,0 +1,467 @@
+﻿<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registration - Adarsh Cyber Zone</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top-header">
+    <img src="logo.png" alt="Adarsh Cyber Zone Logo">
+    <div>
+        <h1 class="brand-title">आदर्श साइबर ज़ोन & ग्राहक सेवा केन्द्र</h1>
+        <p class="brand-subtitle">CSC, RTPS, Digital Services और Online Form Support</p>
+    </div>
+</header>
+
+<nav>
+    <a href="register.html">Register</a>
+    <a href="login.html">Login</a>
+    <a href="knowregno.html">Know Reg No</a>
+    <a href="adminlogin.html">Admin Login</a>
+    <a href="payment.html"> Fee Payment</a>
+</nav>
+
+<main class="container">
+    <section class="card">
+        <h2>Registration Form</h2>
+        <div class="notice">Fill all required fields carefully. DOB format should be DD-MM-YYYY.</div>
+
+        <div class="progress-shell" aria-live="polite">
+            <div class="progress-bar"><div class="progress-fill" id="formProgress"></div></div>
+            <div class="progress-text" id="progressText">0% complete</div>
+        </div>
+
+        <form id="registerForm" novalidate>
+            <div class="form-grid">
+                <div class="form-group"><label for="applicantNameEng">* Applicant Name (English)</label><input type="text" id="applicantNameEng" class="autoUpper" required></div>
+                <div class="form-group"><label for="applicantNameHindi">Applicant Name (Hindi)</label><input type="text" id="applicantNameHindi"></div>
+                <div class="form-group"><label for="fatherNameEng">* Father Name (English)</label><input type="text" id="fatherNameEng" class="autoUpper" required></div>
+                <div class="form-group"><label for="fatherNameHindi">Father Name (Hindi)</label><input type="text" id="fatherNameHindi"></div>
+                <div class="form-group"><label for="motherNameEng">* Mother Name (English)</label><input type="text" id="motherNameEng" class="autoUpper" required></div>
+                <div class="form-group"><label for="motherNameHindi">Mother Name (Hindi)</label><input type="text" id="motherNameHindi"></div>
+                <div class="form-group"><label for="husbandNameEng">Husband Name (English)</label><input type="text" id="husbandNameEng" class="autoUpper"></div>
+                <div class="form-group"><label for="husbandNameHindi">Husband Name (Hindi)</label><input type="text" id="husbandNameHindi"></div>
+                <div class="form-group"><label for="maritalStatus">* Marital Status</label><select id="maritalStatus" required><option value="">Select</option><option>MARRIED</option><option>UNMARRIED</option><option>DIVORCED</option><option>WIDOW</option></select></div>
+                <div class="form-group"><label for="dob">* DOB (DD-MM-YYYY)</label><input type="text" id="dob" maxlength="10" placeholder="DD-MM-YYYY" required></div>
+                <div class="form-group"><label for="gender">* Gender</label><select id="gender" required><option value="">Select</option><option>MALE</option><option>FEMALE</option><option>OTHER</option></select></div>
+                <div class="form-group"><label for="casteCategory">* Caste Category</label><select id="casteCategory" required><option value="">Select</option><option>GENERAL</option><option>OBC</option><option>EBC</option><option>SC</option><option>ST</option></select></div>
+                <div class="form-group"><label for="casteName">* Caste Name</label><input type="text" id="casteName" class="autoUpper" required></div>
+                <div class="form-group"><label for="profession">* Profession</label><select id="profession" required><option value="">Select</option><option>STUDENT</option><option>FARMER</option><option>BUSINESS</option><option>PRIVATE JOB</option><option>GOVT JOB</option><option>LABOUR</option><option>OTHER</option></select></div>
+                <div class="form-group"><label for="annualIncome">* Total Annual Income</label><input type="text" id="annualIncome" maxlength="8" placeholder="325000" required></div>
+                <div class="form-group"><label for="mobile">* Mobile Number</label><input type="tel" id="mobile" maxlength="10" placeholder="9876543210" required></div>
+                <div class="form-group"><label for="email">* Email Address</label><input type="email" id="email" placeholder="example@gmail.com" required></div>
+
+                <div class="form-section-title">Present Address</div>
+                <div class="form-group"><label for="presentVillage">* Village/Town</label><input type="text" id="presentVillage" class="autoUpper" required></div>
+                <div class="form-group"><label for="presentPostOffice">* Post Office</label><input type="text" id="presentPostOffice" class="autoUpper" required></div>
+                <div class="form-group"><label for="presentPanchayat">* Panchayat</label><input type="text" id="presentPanchayat" class="autoUpper" required></div>
+                <div class="form-group"><label for="presentBlock">* Block</label><input type="text" id="presentBlock" class="autoUpper" required></div>
+                <div class="form-group"><label for="presentPoliceStation">* Police Station</label><input type="text" id="presentPoliceStation" class="autoUpper" required></div>
+                <div class="form-group"><label for="presentDistrict">* District</label><select id="presentDistrict" required><option value="">Select District</option><option>PATNA</option><option>GAYA</option><option>MUZAFFARPUR</option><option>BHAGALPUR</option><option>PURNIA</option><option>NALANDA</option><option>VAISHALI</option><option>SARAN</option><option>SIWAN</option><option>ARARIA</option><option>OTHER</option></select></div>
+                <div class="form-group"><label for="presentSubDistrict">* Sub District</label><input type="text" id="presentSubDistrict" class="autoUpper" required></div>
+                <div class="form-group"><label for="presentWardNo">* Ward No</label><input type="text" id="presentWardNo" required></div>
+                <div class="form-group"><label for="presentPinCode">* Pin Code</label><input type="text" id="presentPinCode" maxlength="6" placeholder="800001" required></div>
+
+                <div class="form-section-title">Permanent Address</div>
+                <div class="form-group full-span">
+                    <label class="checkbox-line"><input type="checkbox" id="sameAsPresent"> Same as Present Address</label>
+                </div>
+                <div class="form-group"><label for="permanentVillage">* Village/Town</label><input type="text" id="permanentVillage" class="autoUpper permanent-address" required></div>
+                <div class="form-group"><label for="permanentPostOffice">* Post Office</label><input type="text" id="permanentPostOffice" class="autoUpper permanent-address" required></div>
+                <div class="form-group"><label for="permanentPanchayat">* Panchayat</label><input type="text" id="permanentPanchayat" class="autoUpper permanent-address" required></div>
+                <div class="form-group"><label for="permanentBlock">* Block</label><input type="text" id="permanentBlock" class="autoUpper permanent-address" required></div>
+                <div class="form-group"><label for="permanentPoliceStation">* Police Station</label><input type="text" id="permanentPoliceStation" class="autoUpper permanent-address" required></div>
+                <div class="form-group"><label for="permanentDistrict">* District</label><select id="permanentDistrict" class="permanent-address" required><option value="">Select District</option><option>PATNA</option><option>GAYA</option><option>MUZAFFARPUR</option><option>BHAGALPUR</option><option>PURNIA</option><option>NALANDA</option><option>VAISHALI</option><option>SARAN</option><option>SIWAN</option><option>ARARIA</option><option>OTHER</option></select></div>
+                <div class="form-group"><label for="permanentSubDistrict">* Sub District</label><input type="text" id="permanentSubDistrict" class="autoUpper permanent-address" required></div>
+                <div class="form-group"><label for="permanentWardNo">* Ward No</label><input type="text" id="permanentWardNo" class="permanent-address" required></div>
+                <div class="form-group"><label for="permanentPinCode">* Pin Code</label><input type="text" id="permanentPinCode" class="permanent-address" maxlength="6" placeholder="800001" required></div>
+
+                <div class="form-section-title">Documents</div>
+                <div class="form-group"><label for="photo">* Photo (JPG/PNG, max 2MB)</label><input type="file" id="photo" accept="image/jpeg,image/png" required></div>
+                <div class="form-group"><label for="signature">* Signature (JPG/PNG, max 1MB)</label><input type="file" id="signature" accept="image/jpeg,image/png" required></div>
+                <div class="form-group"><label for="aadhaar">* Aadhaar Card (JPG/PNG/PDF, max 3MB)</label><input type="file" id="aadhaar" accept=".jpg,.jpeg,.png,.pdf" required></div>
+                <div class="form-group"><label for="otherDocument">Other Document (optional, max 3MB)</label><input type="file" id="otherDocument" accept=".jpg,.jpeg,.png,.pdf"></div>
+            </div>
+
+            <div class="preview-grid" id="filePreview"></div>
+
+            <div class="button-row">
+                <button type="submit" class="btn btn-green" id="submitBtn">Submit Registration</button>
+                <a class="btn btn-light" href="rtpscounter.html">Back to RTPS Counter</a>
+            </div>
+            <div id="registerMsg"></div>
+        </form>
+    </section>
+</main>
+
+<div id="printContentContainer" style="display:none"><div id="printContent"></div></div>
+
+<div class="modal-bg" id="confirmModal">
+    <div class="modal-box">
+        <h3>Confirm</h3>
+        <p id="confirmText">Do you want to submit this registration?</p>
+        <div class="modal-actions">
+            <button class="modal-yes" onclick="confirmYes()">Yes, Submit</button>
+            <button class="modal-no" onclick="confirmNo()">Edit</button>
+        </div>
+    </div>
+</div>
+
+<footer class="site-footer">&copy; 2026 Adarsh Cyber Zone</footer>
+<script src="script.js"></script>
+<script>
+let lastRegistrationData = null;
+let lastRegNumber = null;
+let isSubmitting = false;
+
+const addressParts = [
+    ["Village", "Village/Town"],
+    ["PostOffice", "Post Office"],
+    ["Panchayat", "Panchayat"],
+    ["Block", "Block"],
+    ["PoliceStation", "Police Station"],
+    ["District", "District"],
+    ["SubDistrict", "Sub District"],
+    ["WardNo", "Ward No"],
+    ["PinCode", "Pin Code"]
+];
+
+const fieldIds = [
+    "applicantNameEng", "applicantNameHindi", "fatherNameEng", "fatherNameHindi", "motherNameEng", "motherNameHindi",
+    "husbandNameEng", "husbandNameHindi", "maritalStatus", "dob", "gender", "casteCategory", "casteName", "profession",
+    "annualIncome", "mobile", "email", "presentVillage", "presentPostOffice", "presentPanchayat", "presentBlock",
+    "presentPoliceStation", "presentDistrict", "presentSubDistrict", "presentWardNo", "presentPinCode", "sameAsPresent",
+    "permanentVillage", "permanentPostOffice", "permanentPanchayat", "permanentBlock", "permanentPoliceStation",
+    "permanentDistrict", "permanentSubDistrict", "permanentWardNo", "permanentPinCode"
+];
+
+function getFieldValue(id) {
+    const field = $(id);
+    if (!field) return "";
+    return field.type === "checkbox" ? field.checked : field.value.trim();
+}
+
+function buildAddress(prefix) {
+    return addressParts.map(([key, label]) => `${label}: ${getFieldValue(prefix + key) || "-"}`).join(", ");
+}
+
+function syncPermanentAddress() {
+    const same = $("sameAsPresent")?.checked;
+    addressParts.forEach(([key]) => {
+        const permanent = $("permanent" + key);
+        if (!permanent) return;
+        if (same) permanent.value = getFieldValue("present" + key);
+        permanent.disabled = !!same;
+    });
+}
+
+function transliterateToHindi(value) {
+    const words = String(value || "").toLowerCase().match(/[a-z]+|[^a-z]+/g) || [];
+    return words.map((part) => /^[a-z]+$/.test(part) ? transliterateWord(part) : part).join("").replace(/\s+/g, " ").trim();
+}
+
+function transliterateWord(word) {
+    const vowels = {
+        aa: "आ", ai: "ऐ", au: "औ", ee: "ई", ii: "ई", oo: "ऊ", uu: "ऊ",
+        a: "अ", e: "ए", i: "इ", o: "ओ", u: "उ"
+    };
+    const vowelSigns = {
+        aa: "ा", ai: "ै", au: "ौ", ee: "ी", ii: "ी", oo: "ू", uu: "ू",
+        a: "", e: "े", i: "ि", o: "ो", u: "ु"
+    };
+    const consonants = {
+        ksh: "क्ष", gy: "ज्ञ", gya: "ज्ञ", shr: "श्र",
+        kh: "ख", gh: "घ", chh: "छ", ch: "च", jh: "झ", th: "थ", dh: "ध", ph: "फ", bh: "भ",
+        sh: "श", gn: "ज्ञ", tr: "त्र",
+        k: "क", g: "ग", c: "क", j: "ज", t: "त", d: "द", n: "न", p: "प", b: "ब",
+        m: "म", y: "य", r: "र", l: "ल", v: "व", w: "व", s: "स", h: "ह", f: "फ", q: "क", x: "क्स", z: "ज"
+    };
+    const vowelKeys = Object.keys(vowels).sort((a, b) => b.length - a.length);
+    const consonantKeys = Object.keys(consonants).sort((a, b) => b.length - a.length);
+    let out = "";
+    let i = 0;
+    while (i < word.length) {
+        const vowel = vowelKeys.find((key) => word.startsWith(key, i));
+        if (vowel) {
+            out += vowels[vowel];
+            i += vowel.length;
+            continue;
+        }
+        const consonant = consonantKeys.find((key) => word.startsWith(key, i));
+        if (!consonant) {
+            out += word[i];
+            i += 1;
+            continue;
+        }
+        out += consonants[consonant];
+        i += consonant.length;
+        const nextVowel = vowelKeys.find((key) => word.startsWith(key, i));
+        if (nextVowel) {
+            out += vowelSigns[nextVowel];
+            i += nextVowel.length;
+        } else if (i < word.length) {
+            out += "्";
+        }
+    }
+    return out;
+}
+
+function bindHindiAutoFill(englishId, hindiId) {
+    const english = $(englishId);
+    const hindi = $(hindiId);
+    if (!english || !hindi) return;
+    hindi.dataset.autoHindi = "1";
+    hindi.addEventListener("input", () => {
+        hindi.dataset.autoHindi = hindi.value.trim() ? "0" : "1";
+    });
+    english.addEventListener("input", () => {
+        if (hindi.dataset.autoHindi === "1") hindi.value = transliterateToHindi(english.value);
+    });
+}
+
+function validateFile(id, maxMb, types) {
+    const file = $(id).files[0];
+    if (!file) return `${id} upload karein.`;
+    if (file.size > maxMb * 1024 * 1024) return `${id} ${maxMb}MB se kam hona chahiye.`;
+    const extension = file.name.split(".").pop().toLowerCase();
+    if (!types.includes(extension)) return `${id} ka file type sahi nahi hai.`;
+    return null;
+}
+
+function validateForm() {
+    const required = [
+        ["applicantNameEng", "Applicant Name"], ["fatherNameEng", "Father Name"], ["motherNameEng", "Mother Name"],
+        ["maritalStatus", "Marital Status"], ["dob", "DOB"], ["gender", "Gender"], ["casteCategory", "Caste Category"],
+        ["casteName", "Caste Name"], ["profession", "Profession"], ["annualIncome", "Annual Income"], ["mobile", "Mobile"],
+        ["email", "Email"], ["presentVillage", "Present Village"], ["presentPostOffice", "Present Post Office"],
+        ["presentPanchayat", "Present Panchayat"], ["presentBlock", "Present Block"], ["presentPoliceStation", "Present Police Station"],
+        ["presentDistrict", "Present District"], ["presentSubDistrict", "Present Sub District"], ["presentWardNo", "Present Ward No"],
+        ["presentPinCode", "Present Pin Code"]
+    ];
+    if ($("sameAsPresent").checked) {
+        syncPermanentAddress();
+    } else {
+        required.push(
+            ["permanentVillage", "Permanent Village"], ["permanentPostOffice", "Permanent Post Office"],
+            ["permanentPanchayat", "Permanent Panchayat"], ["permanentBlock", "Permanent Block"],
+            ["permanentPoliceStation", "Permanent Police Station"], ["permanentDistrict", "Permanent District"],
+            ["permanentSubDistrict", "Permanent Sub District"], ["permanentWardNo", "Permanent Ward No"],
+            ["permanentPinCode", "Permanent Pin Code"]
+        );
+    }
+    for (const [id, label] of required) {
+        if (!$(id).value.trim()) return `${label} bharen.`;
+    }
+    if (!validateDob($("dob").value.trim())) return "DOB DD-MM-YYYY format me bharen.";
+    if (!/^[6-9]\d{9}$/.test($("mobile").value.trim())) return "Mobile Number 10 digits ka aur 6-9 se shuru hona chahiye.";
+    if (!/^\d{6}$/.test($("presentPinCode").value.trim())) return "Present Pin Code 6 digits ka hona chahiye.";
+    if (!/^\d{6}$/.test($("permanentPinCode").value.trim())) return "Permanent Pin Code 6 digits ka hona chahiye.";
+    if (!/^[^\s@]+@([^\s@.,]+\.)+[^\s@]{2,}$/.test($("email").value.trim())) return "Email sahi bharen.";
+    if (Number($("annualIncome").value) <= 0) return "Annual Income sahi bharen.";
+
+    return validateFile("photo", 2, ["jpg", "jpeg", "png"]) ||
+        validateFile("signature", 1, ["jpg", "jpeg", "png"]) ||
+        validateFile("aadhaar", 3, ["jpg", "jpeg", "png", "pdf"]) ||
+        ($("otherDocument").files[0] ? validateFile("otherDocument", 3, ["jpg", "jpeg", "png", "pdf"]) : null);
+}
+
+function generateRegistrationNumber() {
+    const lastReg = localStorage.getItem("last_reg_number");
+    const lastNumber = lastReg?.match(/ACZ(\d+)/)?.[1];
+    const nextNum = lastNumber ? Number(lastNumber) + 1 : 1;
+    const newReg = `ACZ${String(nextNum).padStart(7, "0")}`;
+    localStorage.setItem("last_reg_number", newReg);
+    return newReg;
+}
+
+function collectFormData(regNo) {
+    const data = {
+        action: "register",
+        RegNo: regNo,
+        regNo,
+        Status: "PENDING"
+    };
+    const map = {
+        applicantNameEng: "ApplicantNmaeEng", applicantNameHindi: "ApplicantNmaeHindi", fatherNameEng: "FatherNameEng",
+        fatherNameHindi: "FatherNameHindi", motherNameEng: "MotherNameEng", motherNameHindi: "MotherNameHindi",
+        husbandNameEng: "HusbandNameEng", husbandNameHindi: "HusbandNameHindi", maritalStatus: "MaritalStatus",
+        dob: "DOB", gender: "Gender", casteCategory: "CasteCategory", casteName: "CasteName", profession: "Profession",
+        annualIncome: "TotalAnnualIncome", mobile: "MobileNumber", email: "Email"
+    };
+    Object.entries(map).forEach(([id, key]) => data[key] = $(id).value.trim());
+    if ($("sameAsPresent").checked) syncPermanentAddress();
+    data.FullPresentAddress = buildAddress("present");
+    data.FullPermanentAddress = $("sameAsPresent").checked ? data.FullPresentAddress : buildAddress("permanent");
+
+    data.ApplicantNameEng = data.ApplicantNmaeEng;
+    data.ApplicantNameHindi = data.ApplicantNmaeHindi;
+    return data;
+}
+
+async function submitRegistration() {
+    if (isSubmitting) return;
+    const error = validateForm();
+    if (error) {
+        showMessage("registerMsg", error, true);
+        return;
+    }
+
+    isSubmitting = true;
+    const restore = setButtonLoading($("submitBtn"), "Submitting...");
+    const regNo = generateRegistrationNumber();
+    const formData = collectFormData(regNo);
+
+    try {
+        const fileJobs = [
+            ["photo", "photoBase64", "photoFileName"],
+            ["signature", "signatureBase64", "signatureFileName"],
+            ["aadhaar", "aadhaarBase64", "aadhaarFileName"],
+            ["otherDocument", "otherDocumentBase64", "otherDocumentFileName"]
+        ].filter(([id]) => $(id)?.files[0]).map(async ([id, base64Key, nameKey]) => {
+            const file = $(id).files[0];
+            if (!file) return;
+            formData[base64Key] = await fileToBase64(file);
+            formData[nameKey] = file.name;
+        });
+        await Promise.all(fileJobs);
+
+        const result = await sendRequest(formData);
+        if (!result.success) throw new Error(result.message || "Registration failed");
+
+        const finalRegNo = result.regNo || result.RegNo || regNo;
+        localStorage.setItem("last_reg_number", finalRegNo);
+        const receiptHtml = generatePrintContent(formData, finalRegNo);
+        sessionStorage.setItem("last_success_reg_no", finalRegNo);
+        sessionStorage.setItem("last_registration_receipt", receiptHtml);
+        localStorage.removeItem("registration_draft");
+        $("registerForm").reset();
+        syncPermanentAddress();
+        updateProgress();
+        renderFilePreview();
+        location.href = `registration-success.html?regNo=${encodeURIComponent(finalRegNo)}`;
+    } catch (error) {
+        showMessage("registerMsg", `Server error: ${error.message}`, true);
+    } finally {
+        restore();
+        isSubmitting = false;
+    }
+}
+
+function generatePrintContent(data, regNo) {
+    const rows = [
+        ["Registration No", regNo],
+        ["Applicant Name (English)", data.ApplicantNmaeEng],
+        ["Applicant Name (Hindi)", data.ApplicantNmaeHindi],
+        ["Father Name (English)", data.FatherNameEng],
+        ["Father Name (Hindi)", data.FatherNameHindi],
+        ["Mother Name (English)", data.MotherNameEng],
+        ["Mother Name (Hindi)", data.MotherNameHindi],
+        ["Husband Name (English)", data.HusbandNameEng],
+        ["Husband Name (Hindi)", data.HusbandNameHindi],
+        ["Marital Status", data.MaritalStatus],
+        ["DOB", data.DOB],
+        ["Gender", data.Gender],
+        ["Caste Category", data.CasteCategory],
+        ["Caste Name", data.CasteName],
+        ["Profession", data.Profession],
+        ["Total Annual Income", data.TotalAnnualIncome],
+        ["Mobile Number", data.MobileNumber],
+        ["Email", data.Email],
+        ["Present Address", data.FullPresentAddress],
+        ["Permanent Address", data.FullPermanentAddress],
+        ["Photo File", data.photoFileName],
+        ["Signature File", data.signatureFileName],
+        ["Aadhaar File", data.aadhaarFileName],
+        ["Other Document File", data.otherDocumentFileName],
+        ["Status", data.Status]
+    ].map(([label, value]) => `<tr><td><strong>${escapeHtml(label)}</strong></td><td>${escapeHtml(value || "-")}</td></tr>`).join("");
+    return `<div style="font-family:Arial;padding:24px"><h1>Adarsh Cyber Zone</h1><h2>Registration Receipt</h2><p><strong>Date:</strong> ${new Date().toLocaleDateString("hi-IN")}</p><table border="1" cellspacing="0" cellpadding="8" style="width:100%;border-collapse:collapse">${rows}</table></div>`;
+}
+
+function updateProgress() {
+    if ($("sameAsPresent")?.checked) syncPermanentAddress();
+    const total = fieldIds.filter((id) => id !== "sameAsPresent").length + 3;
+    let completed = fieldIds.filter((id) => id !== "sameAsPresent" && $(id)?.value?.trim()).length;
+    ["photo", "signature", "aadhaar"].forEach((id) => { if ($(id).files[0]) completed += 1; });
+    const percent = Math.round((completed / total) * 100);
+    $("formProgress").style.width = `${percent}%`;
+    $("progressText").textContent = `${percent}% complete`;
+}
+
+function renderFilePreview() {
+    const items = ["photo", "signature", "aadhaar", "otherDocument"].map((id) => {
+        const file = $(id).files[0];
+        return file ? `<div class="file-preview"><strong>${escapeHtml(id)}</strong><br>${escapeHtml(file.name)}<br>${(file.size / 1024 / 1024).toFixed(2)} MB</div>` : "";
+    }).join("");
+    $("filePreview").innerHTML = items;
+}
+
+function saveDraft() {
+    const draft = {};
+    fieldIds.forEach((id) => {
+        if (!$(id)) return;
+        draft[id] = $(id).type === "checkbox" ? $(id).checked : $(id).value;
+    });
+    localStorage.setItem("registration_draft", JSON.stringify(draft));
+    showMessage("registerMsg", "Draft saved in this browser.", false);
+}
+
+function loadDraft() {
+    const draft = JSON.parse(localStorage.getItem("registration_draft") || "{}");
+    Object.entries(draft).forEach(([id, value]) => {
+        if (!$(id)) return;
+        if ($(id).type === "checkbox") $(id).checked = !!value;
+        else $(id).value = value;
+    });
+    syncPermanentAddress();
+}
+
+function clearDraft() {
+    localStorage.removeItem("registration_draft");
+    $("registerForm").reset();
+    syncPermanentAddress();
+    updateProgress();
+    renderFilePreview();
+    showMessage("registerMsg", "Form clear ho gaya.", false);
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".autoUpper").forEach((field) => {
+        field.addEventListener("input", function () { this.value = this.value.toUpperCase(); });
+    });
+    bindHindiAutoFill("applicantNameEng", "applicantNameHindi");
+    bindHindiAutoFill("fatherNameEng", "fatherNameHindi");
+    bindHindiAutoFill("motherNameEng", "motherNameHindi");
+    bindHindiAutoFill("husbandNameEng", "husbandNameHindi");
+    autoDOB("dob");
+    onlyDigits("mobile", 10);
+    onlyDigits("presentPinCode", 6);
+    onlyDigits("permanentPinCode", 6);
+    onlyDigits("annualIncome", 8);
+    loadDraft();
+    $("sameAsPresent").addEventListener("change", () => {
+        syncPermanentAddress();
+        updateProgress();
+    });
+    addressParts.forEach(([key]) => {
+        const present = $("present" + key);
+        if (present) present.addEventListener("input", () => {
+            if ($("sameAsPresent").checked) syncPermanentAddress();
+        });
+    });
+    updateProgress();
+    renderFilePreview();
+    $("registerForm").addEventListener("input", updateProgress);
+    $("registerForm").addEventListener("change", () => { updateProgress(); renderFilePreview(); });
+    $("registerForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const error = validateForm();
+        if (error) showMessage("registerMsg", error, true);
+        else confirmAction("Do you want to submit this registration?", submitRegistration);
+    });
+});
+</script>
+</body>
+</html>

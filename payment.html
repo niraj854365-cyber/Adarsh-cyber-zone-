@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment - Adarsh Cyber Zone</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top-header">
+    <img src="logo.png" alt="Adarsh Cyber Zone Logo">
+    <div>
+        <h1 class="brand-title">आदर्श साइबर ज़ोन & ग्राहक सेवा केन्द्र</h1>
+        <p class="brand-subtitle">CSC, RTPS, Digital Services और Online Form Support</p>
+    </div>
+    <div class="home-header-info">
+        <span><span class="header-mini-icon"></span>📞 हेल्पलाइन नंबर : 9315906342, 9155901766</span>
+        <span><span class="header-mini-icon"></span>📧 Email : niraj854365@gmail.com</span>
+        <span><span class="header-mini-icon"></span>🕒 Timing: 9:00 AM – 6:00 PM</span>
+        <span><span class="header-mini-icon"></span>📅 Working Days: Mon – Sat.</span>
+        
+    </div>
+</header>
+
+<nav>
+    <a href="register.html">Register</a>
+    <a href="login.html">Login</a>
+    <a href="knowregno.html">Know Reg No</a>
+    <a href="adminlogin.html">Admin Login</a>
+    <a href="payment.html"> Fee Payment</a>
+</nav>
+
+<main class="container">
+        <section class="card auth-card payment-card">
+            <h2>Submit Payment Details</h2>
+            <div class="notice">UPI payment ke baad Transaction ID aur payment screenshot/slip upload karein.</div>
+
+            <form id="paymentForm" novalidate>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="payRegNo">* Registration No</label>
+                        <input type="text" id="payRegNo" maxlength="10" placeholder="ACZ0000001" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="payApplicantName">* Applicant Name</label>
+                        <input type="text" id="payApplicantName" class="autoUpper" placeholder="APPLICANT NAME" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="transactionId">* Transaction ID / UTR</label>
+                        <input type="text" id="transactionId" class="autoUpper" placeholder="UPI TRANSACTION ID" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="paymentSlip">* Payment Slip / Screenshot</label>
+                        <input type="file" id="paymentSlip" accept=".jpg,.jpeg,.png,.pdf" required>
+                        <small>JPG, PNG ya PDF file upload karein. Maximum size 5MB.</small>
+                    </div>
+                </div>
+
+                <div class="button-row">
+                    <button type="submit" class="btn btn-green" id="paymentSubmitBtn">Submit Payment</button>
+                    <a class="btn btn-light" href="index.html">Back to Home</a>
+                </div>
+                <div id="paymentMsg"></div>
+            </form>
+        </section>
+</main>
+
+<div class="modal-bg" id="confirmModal">
+    <div class="modal-box">
+        <h3>Confirmation</h3>
+        <p id="confirmText">Do you want to continue?</p>
+        <div class="modal-actions">
+            <button class="modal-yes" onclick="confirmYes()">Yes</button>
+            <button class="modal-no" onclick="confirmNo()">No</button>
+        </div>
+    </div>
+</div>
+
+<footer class="site-footer">&copy; 2026 Adarsh Cyber Zone</footer>
+<script src="script.js"></script>
+<script>
+let paymentSubmitting = false;
+
+function loadPaymentParams() {
+    const params = new URLSearchParams(location.search);
+    const regNo = params.get("regNo") || "";
+    const name = params.get("name") || "";
+    if (regNo) $("payRegNo").value = regNo.toUpperCase();
+    if (name) $("payApplicantName").value = name.toUpperCase();
+}
+
+function validatePaymentForm() {
+    const regNo = $("payRegNo").value.trim().toUpperCase();
+    const applicantName = $("payApplicantName").value.trim().toUpperCase();
+    const transactionId = $("transactionId").value.trim().toUpperCase();
+    const file = $("paymentSlip").files[0];
+
+    if (!/^ACZ\d{7}$/.test(regNo)) return "Registration No format sahi bharen.";
+    if (!applicantName) return "Applicant Name bharen.";
+    if (!transactionId) return "Transaction ID bharen.";
+    if (!file) return "Payment Slip upload karein.";
+    if (file.size > 5 * 1024 * 1024) return "Payment Slip 5MB se kam honi chahiye.";
+    if (!["jpg", "jpeg", "png", "pdf"].includes(file.name.split(".").pop().toLowerCase())) return "Payment Slip JPG, PNG ya PDF honi chahiye.";
+    return null;
+}
+
+async function submitPayment() {
+    if (paymentSubmitting) return;
+    const error = validatePaymentForm();
+    if (error) {
+        showMessage("paymentMsg", error, true);
+        return;
+    }
+
+    paymentSubmitting = true;
+    const restore = setButtonLoading($("paymentSubmitBtn"), "Submitting...");
+    const file = $("paymentSlip").files[0];
+    const data = {
+        action: "submitPayment",
+        RegNo: $("payRegNo").value.trim().toUpperCase(),
+        regNo: $("payRegNo").value.trim().toUpperCase(),
+        ApplicantNmae: $("payApplicantName").value.trim().toUpperCase(),
+        applicantName: $("payApplicantName").value.trim().toUpperCase(),
+        TransactionId: $("transactionId").value.trim().toUpperCase(),
+        transactionId: $("transactionId").value.trim().toUpperCase(),
+        PaymentSlipLink: "",
+        paymentSlipBase64: await fileToBase64(file),
+        paymentSlipFileName: file.name
+    };
+
+    try {
+        const result = await sendRequest(data);
+        if (!result.success) throw new Error(result.message || "Payment submit failed");
+        showMessage("paymentMsg", "Payment details submit ho gaya.", false, 0);
+        $("paymentForm").reset();
+    } catch (error) {
+        showMessage("paymentMsg", "Server error: " + error.message, true);
+    } finally {
+        restore();
+        paymentSubmitting = false;
+    }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    regNoFormat("payRegNo");
+    document.querySelectorAll(".autoUpper").forEach((field) => {
+        field.addEventListener("input", function () { this.value = this.value.toUpperCase(); });
+    });
+    loadPaymentParams();
+    $("paymentForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const error = validatePaymentForm();
+        if (error) showMessage("paymentMsg", error, true);
+        else confirmAction("Do you want to submit this payment?", submitPayment);
+    });
+});
+</script>
+</body>
+</html>

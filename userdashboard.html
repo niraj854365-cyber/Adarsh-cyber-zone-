@@ -1,0 +1,379 @@
+﻿<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Dashboard - Adarsh Cyber Zone</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top-header">
+    <img src="logo.png" alt="Adarsh Cyber Zone Logo">
+    <div>
+        <h1 class="brand-title">आदर्श साइबर ज़ोन & ग्राहक सेवा केन्द्र</h1>
+        <p class="brand-subtitle">CSC, RTPS, Digital Services और Online Form Support</p>
+    </div>
+    <div class="home-header-info">
+        <span><span class="header-mini-icon"></span>📞 हेल्पलाइन नंबर : 9315906342, 9155901766</span>
+        <span><span class="header-mini-icon"></span>📧 Email : niraj854365@gmail.com</span>
+        <span><span class="header-mini-icon"></span>🕒 Timing: 9:00 AM – 6:00 PM</span>
+        <span><span class="header-mini-icon"></span>📅 Working Days: Mon – Sat.</span>
+        
+    </div>
+</header>
+
+<nav class="single-nav">
+    <a href="userdashboard.html">User Dashboard</a>
+    <a class="nav-logout" href="login.html" onclick="return logoutUser()">Logout</a>
+</nav>
+
+<main class="container">
+    <div id="dashboardMsg"></div>
+    <div class="dashboard-shell">
+        <aside class="pvc-card">
+            <div class="pvc-top">USER PROFILE</div>
+            <div class="pvc-photo-wrap">
+                <img id="cardPhoto" src="" alt="User Photo">
+            </div>
+            <div class="pvc-welcome">Welcome</div>
+            <h2 id="cardName">User Name</h2>
+            <div class="pvc-reg" id="cardRegNo">ACZ0000000</div>
+            <div class="pvc-status" id="cardStatus">PENDING</div>
+            <div class="pvc-actions">
+                <button type="button" class="btn btn-blue" onclick="showProfileView()">View Profile</button>
+                <button type="button" class="btn btn-green" onclick="showProfileEdit()">Edit Profile</button>
+                <button type="button" class="btn btn-light" onclick="printLatestReceipt()">Print Receipt</button>
+            </div>
+        </aside>
+
+        <section class="dashboard-panel" id="dashboardPanel">
+            <section class="dashboard-top-card">
+                <h2>Certificates & Receipts</h2>
+                <div class="document-empty">Loading certificates...</div>
+            </section>
+        </section>
+    </div>
+</main>
+
+<footer class="site-footer">&copy; 2026 Adarsh Cyber Zone</footer>
+<script src="script.js"></script>
+<script>
+let loggedUser = null;
+let certificatesCache = [];
+
+function valueFrom(obj, ...keys) {
+    for (const key of keys) if (obj?.[key]) return obj[key];
+    return "";
+}
+
+function currentRegNo() {
+    return valueFrom(loggedUser, "regNo", "RegNo");
+}
+
+function currentApplicantName() {
+    return valueFrom(loggedUser, "ApplicantNmaeEng", "ApplicantNameEng");
+}
+
+function userDob() {
+    return formatDate(loggedUser?.DOB);
+}
+
+function driveFileId(url) {
+    const text = String(url || "");
+    return text.match(/\/d\/([^/]+)/)?.[1] || text.match(/[?&]id=([^&]+)/)?.[1] || "";
+}
+
+function driveThumbnailUrl(url, size = "w500") {
+    const id = driveFileId(url);
+    return id ? `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=${size}` : (url || FALLBACK_LOGO);
+}
+
+function profileRow(label, value) {
+    return `<div class="profile-row"><div class="profile-label">${escapeHtml(label)}</div><div class="profile-value">${escapeHtml(value || "-")}</div></div>`;
+}
+
+function docDownloadLink(label, url) {
+    if (!url) return `<div class="document-empty">${escapeHtml(label)} उपलब्ध नहीं है।</div>`;
+    return `<button type="button" class="doc-link" onclick="downloadUserDocument('${escapeHtml(label)}','${encodeURIComponent(url)}')"><span class="eye-icon" aria-hidden="true">⬇</span>${escapeHtml(label)}</button>`;
+}
+
+function allProfileRows() {
+    return [
+        ["Registration No", currentRegNo()],
+        ["Applicant Name (English)", currentApplicantName()],
+        ["Applicant Name (Hindi)", loggedUser.ApplicantNmaeHindi || loggedUser.ApplicantNameHindi],
+        ["Father Name (English)", loggedUser.FatherNameEng],
+        ["Father Name (Hindi)", loggedUser.FatherNameHindi],
+        ["Mother Name (English)", loggedUser.MotherNameEng],
+        ["Mother Name (Hindi)", loggedUser.MotherNameHindi],
+        ["Husband Name (English)", loggedUser.HusbandNameEng],
+        ["Husband Name (Hindi)", loggedUser.HusbandNameHindi],
+        ["Marital Status", loggedUser.MaritalStatus],
+        ["DOB", userDob()],
+        ["Gender", loggedUser.Gender],
+        ["Caste Category", loggedUser.CasteCategory],
+        ["Caste Name", loggedUser.CasteName],
+        ["Profession", loggedUser.Profession],
+        ["Total Annual Income", loggedUser.TotalAnnualIncome],
+        ["Mobile Number", loggedUser.MobileNumber],
+        ["Email", loggedUser.Email],
+        ["Present Address", loggedUser.FullPresentAddress],
+        ["Permanent Address", loggedUser.FullPermanentAddress],
+        ["Status", loggedUser.Status || "PENDING"]
+    ];
+}
+
+function updateCard() {
+    $("cardName").textContent = currentApplicantName() || "User Name";
+    $("cardRegNo").textContent = currentRegNo() || "ACZ0000000";
+    $("cardStatus").textContent = loggedUser.Status || "PENDING";
+    $("cardStatus").className = `pvc-status ${String(loggedUser.Status || "PENDING").toLowerCase()}`;
+    $("cardPhoto").src = loggedUser.PhotoLink ? driveThumbnailUrl(loggedUser.PhotoLink, "w400") : FALLBACK_LOGO;
+}
+
+async function loadUserDashboard() {
+    const savedUser = localStorage.getItem("loggedUser");
+    if (!savedUser) {
+        location.href = "login.html";
+        return;
+    }
+    loggedUser = JSON.parse(savedUser);
+    updateCard();
+    await refreshFromServer();
+    closePanel();
+}
+
+async function refreshFromServer() {
+    const regNo = currentRegNo();
+    const userResult = await sendRequest({ action: "getUser", regNo, RegNo: regNo, dob: loggedUser.DOB, DOB: loggedUser.DOB });
+    if (userResult.success && userResult.data) {
+        loggedUser = userResult.data;
+        localStorage.setItem("loggedUser", JSON.stringify(loggedUser));
+        updateCard();
+    }
+    const certResult = await sendRequest({ action: "getCertificates", regNo, RegNo: regNo });
+    certificatesCache = certResult.success && Array.isArray(certResult.certificates) ? certResult.certificates : [];
+}
+
+function certificatesTableSectionHtml() {
+    const docs = [...certificatesCache].reverse();
+    const content = docs.length ? `
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Document Name</th>
+                        <th>Upload Date</th>
+                        <th>Download</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${docs.map((cert) => {
+                        const name = cert.CertificateName || cert.certificateName || "Document";
+                        const date = formatDateTime(cert.UploadDate || cert.uploadDate);
+                        const link = cert.CertificateLink || cert.certificateLink || cert.fileUrl || "";
+                        return `<tr>
+                            <td>${escapeHtml(name)}</td>
+                            <td>${escapeHtml(date)}</td>
+                            <td>${link ? `<button type="button" class="btn btn-blue" title="Download" onclick="downloadEncodedDriveFile('${encodeURIComponent(link)}', '${escapeHtml(name)}')">⬇</button>` : "-"}</td>
+                            <td>${link ? `<button type="button" class="btn btn-red" onclick="deleteCertificateDocument('${encodeURIComponent(link)}')">Delete</button>` : "-"}</td>
+                        </tr>`;
+                    }).join("")}
+                </tbody>
+            </table>
+        </div>
+    ` : `<div class="document-empty">कोई certificate या receipt upload नहीं है।</div>`;
+    return `<section class="dashboard-top-card"><h2>Certificates & Receipts</h2>${content}</section>`;
+}
+
+function renderDashboardPanel(content) {
+    $("dashboardPanel").innerHTML = content
+        ? `${certificatesTableSectionHtml()}<section class="dashboard-inner-panel">${content}</section>`
+        : certificatesTableSectionHtml();
+}
+
+function showProfileView(skipConfirm = false) {
+    if (!skipConfirm && !window.confirm("Do you want to view this profile?")) return;
+    renderDashboardPanel(`
+        <div class="panel-head">
+            <h2>Full Profile</h2>
+        </div>
+        <div class="profile-box">${allProfileRows().map(([label, value]) => profileRow(label, value)).join("")}</div>
+        <h3>Uploaded Documents</h3>
+        <div class="doc-list">
+            ${docDownloadLink("Photo", loggedUser.PhotoLink)}
+            ${docDownloadLink("Signature", loggedUser.SignatureLink)}
+            ${docDownloadLink("Aadhaar Document", loggedUser.AadhaarLink)}
+            ${docDownloadLink("Other Document", loggedUser.OtherDocumentLink)}
+        </div>
+        <div class="button-row bottom-close-row">
+            <button type="button" class="btn btn-light" onclick="closePanel()">Close</button>
+        </div>
+    `);
+}
+
+function inputField(id, label, value, type = "text") {
+    return `<div class="form-group"><label for="${id}">${escapeHtml(label)}</label><input type="${type}" id="${id}" value="${escapeHtml(value || "")}"></div>`;
+}
+
+function selectField(id, label, value, options) {
+    return `<div class="form-group"><label for="${id}">${escapeHtml(label)}</label><select id="${id}">${options.map((option) => `<option ${option === value ? "selected" : ""}>${escapeHtml(option)}</option>`).join("")}</select></div>`;
+}
+
+function showProfileEdit() {
+    if (!window.confirm("Do you want to edit this profile?")) return;
+    renderDashboardPanel(`
+        <div class="panel-head">
+            <h2>Edit Profile</h2>
+        </div>
+        <form id="profileEditForm" novalidate>
+            <div class="form-grid">
+                ${inputField("editApplicantEng", "Applicant Name (English)", currentApplicantName())}
+                ${inputField("editApplicantHindi", "Applicant Name (Hindi)", loggedUser.ApplicantNmaeHindi || loggedUser.ApplicantNameHindi)}
+                ${inputField("editFatherEng", "Father Name (English)", loggedUser.FatherNameEng)}
+                ${inputField("editFatherHindi", "Father Name (Hindi)", loggedUser.FatherNameHindi)}
+                ${inputField("editMotherEng", "Mother Name (English)", loggedUser.MotherNameEng)}
+                ${inputField("editMotherHindi", "Mother Name (Hindi)", loggedUser.MotherNameHindi)}
+                ${inputField("editHusbandEng", "Husband Name (English)", loggedUser.HusbandNameEng)}
+                ${inputField("editHusbandHindi", "Husband Name (Hindi)", loggedUser.HusbandNameHindi)}
+                ${selectField("editMarital", "Marital Status", loggedUser.MaritalStatus, ["MARRIED", "UNMARRIED", "DIVORCED", "WIDOW"])}
+                ${inputField("editDob", "DOB (DD-MM-YYYY)", userDob())}
+                ${selectField("editGender", "Gender", loggedUser.Gender, ["MALE", "FEMALE", "OTHER"])}
+                ${selectField("editCasteCategory", "Caste Category", loggedUser.CasteCategory, ["GENERAL", "OBC", "EBC", "SC", "ST"])}
+                ${inputField("editCasteName", "Caste Name", loggedUser.CasteName)}
+                ${selectField("editProfession", "Profession", loggedUser.Profession, ["STUDENT", "FARMER", "BUSINESS", "PRIVATE JOB", "GOVT JOB", "LABOUR", "OTHER"])}
+                ${inputField("editIncome", "Total Annual Income", loggedUser.TotalAnnualIncome)}
+                ${inputField("editMobile", "Mobile Number", loggedUser.MobileNumber)}
+                ${inputField("editEmail", "Email", loggedUser.Email, "email")}
+                <div class="form-group full-span"><label for="editPresentAddress">Present Address</label><textarea id="editPresentAddress">${escapeHtml(loggedUser.FullPresentAddress || "")}</textarea></div>
+                <div class="form-group full-span"><label for="editPermanentAddress">Permanent Address</label><textarea id="editPermanentAddress">${escapeHtml(loggedUser.FullPermanentAddress || "")}</textarea></div>
+                <div class="form-section-title">Update Documents</div>
+                <div class="form-group"><label for="editPhoto">Photo</label><input type="file" id="editPhoto" accept="image/jpeg,image/png"></div>
+                <div class="form-group"><label for="editSignature">Signature</label><input type="file" id="editSignature" accept="image/jpeg,image/png"></div>
+                <div class="form-group"><label for="editAadhaar">Aadhaar Document</label><input type="file" id="editAadhaar" accept=".jpg,.jpeg,.png,.pdf"></div>
+                <div class="form-group"><label for="editOtherDocument">Other Document</label><input type="file" id="editOtherDocument" accept=".jpg,.jpeg,.png,.pdf"></div>
+            </div>
+            <div class="button-row bottom-close-row">
+                <button type="submit" class="btn btn-green">Save Changes</button>
+                <button type="button" class="btn btn-light" onclick="closePanel()">Close</button>
+            </div>
+        </form>
+    `);
+    onlyDigits("editMobile", 10);
+    onlyDigits("editIncome", 8);
+    autoDOB("editDob");
+    $("profileEditForm").addEventListener("submit", saveFullProfile);
+}
+
+async function saveFullProfile(event) {
+    event.preventDefault();
+    if (!window.confirm("Do you want to update this profile?")) return;
+    const updateData = {
+        action: "updateProfile",
+        RegNo: currentRegNo(),
+        regNo: currentRegNo(),
+        ApplicantNmaeEng: $("editApplicantEng").value.trim().toUpperCase(),
+        ApplicantNmaeHindi: $("editApplicantHindi").value.trim(),
+        FatherNameEng: $("editFatherEng").value.trim().toUpperCase(),
+        FatherNameHindi: $("editFatherHindi").value.trim(),
+        MotherNameEng: $("editMotherEng").value.trim().toUpperCase(),
+        MotherNameHindi: $("editMotherHindi").value.trim(),
+        HusbandNameEng: $("editHusbandEng").value.trim().toUpperCase(),
+        HusbandNameHindi: $("editHusbandHindi").value.trim(),
+        MaritalStatus: $("editMarital").value,
+        DOB: formatDate($("editDob").value.trim()),
+        Gender: $("editGender").value,
+        CasteCategory: $("editCasteCategory").value,
+        CasteName: $("editCasteName").value.trim().toUpperCase(),
+        Profession: $("editProfession").value,
+        TotalAnnualIncome: $("editIncome").value.trim(),
+        MobileNumber: $("editMobile").value.trim(),
+        Email: $("editEmail").value.trim(),
+        FullPresentAddress: $("editPresentAddress").value.trim(),
+        FullPermanentAddress: $("editPermanentAddress").value.trim()
+    };
+    updateData.ApplicantNameEng = updateData.ApplicantNmaeEng;
+    const submitButton = event.target.querySelector("button[type='submit']");
+    const restore = setButtonLoading(submitButton, "Saving...");
+    const profileResult = await sendRequest(updateData);
+    if (!profileResult.success) {
+        restore();
+        showMessage("dashboardMsg", profileResult.message || "Profile update failed.", true);
+        return;
+    }
+    const docData = await collectDocumentUpdates();
+    if (Object.keys(docData).length > 0) {
+        const docResult = await sendRequest({ action: "updateUserDocuments", RegNo: currentRegNo(), regNo: currentRegNo(), ...docData });
+        if (!docResult.success) {
+            restore();
+            showMessage("dashboardMsg", docResult.message || "Documents update failed.", true);
+            return;
+        }
+    }
+    restore();
+    loggedUser = { ...loggedUser, ...updateData };
+    localStorage.setItem("loggedUser", JSON.stringify(loggedUser));
+    await refreshFromServer();
+    showProfileView(true);
+    window.alert("Profile update successful.");
+}
+
+async function collectDocumentUpdates() {
+    const map = [
+        ["editPhoto", "photoBase64", "photoFileName"],
+        ["editSignature", "signatureBase64", "signatureFileName"],
+        ["editAadhaar", "aadhaarBase64", "aadhaarFileName"],
+        ["editOtherDocument", "otherDocumentBase64", "otherDocumentFileName"]
+    ];
+    const output = {};
+    await Promise.all(map.filter(([id]) => $(id).files[0]).map(async ([id, base64Key, nameKey]) => {
+        const file = $(id).files[0];
+        output[base64Key] = await fileToBase64(file);
+        output[nameKey] = file.name;
+    }));
+    return output;
+}
+
+function downloadUserDocument(label, encodedUrl) {
+    if (!encodedUrl) return;
+    downloadEncodedDriveFile(encodedUrl, `${currentRegNo()}_${label}`);
+}
+
+async function deleteCertificateDocument(encodedLink) {
+    const link = decodeURIComponent(encodedLink || "");
+    if (!link || !window.confirm("Do you want to delete this document?")) return;
+    const result = await sendRequest({
+        action: "deleteCertificate",
+        RegNo: currentRegNo(),
+        regNo: currentRegNo(),
+        CertificateLink: link,
+        link
+    });
+    if (result.success) {
+        await refreshFromServer();
+        renderDashboardPanel("");
+        window.alert("Document deleted successfully.");
+    } else {
+        showMessage("dashboardMsg", result.message || "Document delete failed.", true);
+    }
+}
+
+async function printLatestReceipt() {
+    await downloadReceiptPdf("Registration Receipt", `${currentRegNo()}_Receipt.pdf`, allProfileRows(), "dashboardMsg");
+}
+
+function closePanel() {
+    renderDashboardPanel("");
+}
+
+function logoutUser() {
+    if (!window.confirm("Do you want to logout?")) return false;
+    localStorage.removeItem("loggedUser");
+    return true;
+}
+
+window.addEventListener("DOMContentLoaded", loadUserDashboard);
+</script>
+</body>
+</html>
