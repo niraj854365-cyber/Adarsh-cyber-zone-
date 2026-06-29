@@ -46,7 +46,11 @@
                 <div class="form-group"><label for="maritalStatus">* Marital Status</label><select id="maritalStatus" required><option value="">Select</option><option>MARRIED</option><option>UNMARRIED</option><option>DIVORCED</option><option>WIDOW</option></select></div>
                 <div class="form-group"><label for="dob">* DOB (DD-MM-YYYY)</label><input type="text" id="dob" maxlength="10" placeholder="DD-MM-YYYY" required></div>
                 <div class="form-group"><label for="gender">* Gender</label><select id="gender" required><option value="">Select</option><option>MALE</option><option>FEMALE</option><option>OTHER</option></select></div>
-                <div class="form-group"><label for="casteCategory">* Caste Category</label><select id="casteCategory" required><option value="">Select</option><option>GENERAL</option><option>OBC</option><option>EBC</option><option>SC</option><option>ST</option></select></div>
+                <div class="form-group"><label for="casteCategory">* Caste Category</label><select id="casteCategory" required><option value="">Select</option><option>(BC-I) / अत्यंत पिछड़ा वर्ग</option>
+<option> (BC-II) / पिछड़ा वर्ग (अनुसूची-2)</option>
+<option> (ST) / अनुसूचित जनजाति</option>
+<option> (SC) / अनुसूचित जाति</option>
+<option> (GENERAL) / गैर आरक्षित</option></select></div>
                 <div class="form-group"><label for="casteName">* Caste Name</label><input type="text" id="casteName" class="autoUpper" required></div>
                 <div class="form-group"><label for="profession">* Profession</label><select id="profession" required><option value="">Select</option><option>STUDENT</option><option>FARMER</option><option>BUSINESS</option><option>PRIVATE JOB</option><option>GOVT JOB</option><option>LABOUR</option><option>OTHER</option></select></div>
                 <div class="form-group"><label for="annualIncome">* Total Annual Income</label><input type="text" id="annualIncome" maxlength="8" placeholder="325000" required></div>
@@ -59,7 +63,45 @@
                 <div class="form-group"><label for="presentPanchayat">* Panchayat</label><input type="text" id="presentPanchayat" class="autoUpper" required></div>
                 <div class="form-group"><label for="presentBlock">* Block</label><input type="text" id="presentBlock" class="autoUpper" required></div>
                 <div class="form-group"><label for="presentPoliceStation">* Police Station</label><input type="text" id="presentPoliceStation" class="autoUpper" required></div>
-                <div class="form-group"><label for="presentDistrict">* District</label><select id="presentDistrict" required><option value="">Select District</option><option>PATNA</option><option>GAYA</option><option>MUZAFFARPUR</option><option>BHAGALPUR</option><option>PURNIA</option><option>NALANDA</option><option>VAISHALI</option><option>SARAN</option><option>SIWAN</option><option>ARARIA</option><option>OTHER</option></select></div>
+                <div class="form-group"><label for="presentDistrict">* District</label><select id="presentDistrict" required><option value="">Select District</option> <option>ARARIA / अररिया</option>
+<option>ARWAL / अरवल</option>
+<option>AURANGABAD / औरंगाबाद</option>
+<option>BANKA / बांका</option>
+<option>BEGUSARAI / बेगूसराय</option>
+<option>BHAGALPUR / भागलपुर</option>
+<option>BHOJPUR / भोजपुर</option>
+<option>BUXAR / बक्सर</option>
+<option>DARBHANGA / दरभंगा</option>
+<option>EAST CHAMPARAN / पूर्वी चंपारण</option>
+<option>GAYA / गया</option>
+<option>GOPALGANJ / गोपालगंज</option>
+<option>JAMUI / जमुई</option>
+<option>JEHANABAD / जहानाबाद</option>
+<option>KAIMUR / कैमूर</option>
+<option>KATIHAR / कटिहार</option>
+<option>KHAGARIA / खगड़िया</option>
+<option>KISHANGANJ / किशनगंज</option>
+<option>LAKHISARAI / लखीसराय</option>
+<option>MADHEPURA / मधेपुरा</option>
+<option>MADHUBANI / मधुबनी</option>
+<option>MUNGER / मुंगेर</option>
+<option>MUZAFFARPUR / मुजफ्फरपुर</option>
+<option>NALANDA / नालंदा</option>
+<option>NAWADA / नवादा</option>
+<option>PATNA / पटना</option>
+<option>PURNIA / पूर्णिया</option>
+<option>ROHTAS / रोहतास</option>
+<option>SAHARSA / सहरसा</option>
+<option>SAMASTIPUR / समस्तीपुर</option>
+<option>SARAN / सारण</option>
+<option>SHEIKHPURA / शेखपुरा</option>
+<option>SHEOHAR / शिवहर</option>
+<option>SITAMARHI / सीतामढ़ी</option>
+<option>SIWAN / सिवान</option>
+<option>SUPAUL / सुपौल</option>
+<option>VAISHALI / वैशाली</option>
+<option>WEST CHAMPARAN / पश्चिमी चंपारण</option>
+    </select></div>
                 <div class="form-group"><label for="presentSubDistrict">* Sub District</label><input type="text" id="presentSubDistrict" class="autoUpper" required></div>
                 <div class="form-group"><label for="presentWardNo">* Ward No</label><input type="text" id="presentWardNo" required></div>
                 <div class="form-group"><label for="presentPinCode">* Pin Code</label><input type="text" id="presentPinCode" maxlength="6" placeholder="800001" required></div>
@@ -73,7 +115,45 @@
                 <div class="form-group"><label for="permanentPanchayat">* Panchayat</label><input type="text" id="permanentPanchayat" class="autoUpper permanent-address" required></div>
                 <div class="form-group"><label for="permanentBlock">* Block</label><input type="text" id="permanentBlock" class="autoUpper permanent-address" required></div>
                 <div class="form-group"><label for="permanentPoliceStation">* Police Station</label><input type="text" id="permanentPoliceStation" class="autoUpper permanent-address" required></div>
-                <div class="form-group"><label for="permanentDistrict">* District</label><select id="permanentDistrict" class="permanent-address" required><option value="">Select District</option><option>PATNA</option><option>GAYA</option><option>MUZAFFARPUR</option><option>BHAGALPUR</option><option>PURNIA</option><option>NALANDA</option><option>VAISHALI</option><option>SARAN</option><option>SIWAN</option><option>ARARIA</option><option>OTHER</option></select></div>
+                <div class="form-group"><label for="permanentDistrict">* District</label><select id="permanentDistrict" class="permanent-address" required><option value="">Select District</option> <option>ARARIA / अररिया</option>
+<option>ARWAL / अरवल</option>
+<option>AURANGABAD / औरंगाबाद</option>
+<option>BANKA / बांका</option>
+<option>BEGUSARAI / बेगूसराय</option>
+<option>BHAGALPUR / भागलपुर</option>
+<option>BHOJPUR / भोजपुर</option>
+<option>BUXAR / बक्सर</option>
+<option>DARBHANGA / दरभंगा</option>
+<option>EAST CHAMPARAN / पूर्वी चंपारण</option>
+<option>GAYA / गया</option>
+<option>GOPALGANJ / गोपालगंज</option>
+<option>JAMUI / जमुई</option>
+<option>JEHANABAD / जहानाबाद</option>
+<option>KAIMUR / कैमूर</option>
+<option>KATIHAR / कटिहार</option>
+<option>KHAGARIA / खगड़िया</option>
+<option>KISHANGANJ / किशनगंज</option>
+<option>LAKHISARAI / लखीसराय</option>
+<option>MADHEPURA / मधेपुरा</option>
+<option>MADHUBANI / मधुबनी</option>
+<option>MUNGER / मुंगेर</option>
+<option>MUZAFFARPUR / मुजफ्फरपुर</option>
+<option>NALANDA / नालंदा</option>
+<option>NAWADA / नवादा</option>
+<option>PATNA / पटना</option>
+<option>PURNIA / पूर्णिया</option>
+<option>ROHTAS / रोहतास</option>
+<option>SAHARSA / सहरसा</option>
+<option>SAMASTIPUR / समस्तीपुर</option>
+<option>SARAN / सारण</option>
+<option>SHEIKHPURA / शेखपुरा</option>
+<option>SHEOHAR / शिवहर</option>
+<option>SITAMARHI / सीतामढ़ी</option>
+<option>SIWAN / सिवान</option>
+<option>SUPAUL / सुपौल</option>
+<option>VAISHALI / वैशाली</option>
+<option>WEST CHAMPARAN / पश्चिमी चंपारण</option>
+        </select></div>
                 <div class="form-group"><label for="permanentSubDistrict">* Sub District</label><input type="text" id="permanentSubDistrict" class="autoUpper permanent-address" required></div>
                 <div class="form-group"><label for="permanentWardNo">* Ward No</label><input type="text" id="permanentWardNo" class="permanent-address" required></div>
                 <div class="form-group"><label for="permanentPinCode">* Pin Code</label><input type="text" id="permanentPinCode" class="permanent-address" maxlength="6" placeholder="800001" required></div>
