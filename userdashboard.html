@@ -60,6 +60,8 @@
 <script>
 let loggedUser = null;
 let certificatesCache = [];
+let requestsCache = [];
+const REQUEST_OPTIONS = ["जाती प्रमाण पत्र", "निवास प्रमाण पत्र", "EWS प्रमाण पत्र", "NCL प्रमाण पत्र"];
 
 function valueFrom(obj, ...keys) {
     for (const key of keys) if (obj?.[key]) return obj[key];
@@ -153,16 +155,19 @@ async function refreshFromServer() {
     }
     const certResult = await sendRequest({ action: "getCertificates", regNo, RegNo: regNo });
     certificatesCache = certResult.success && Array.isArray(certResult.certificates) ? certResult.certificates : [];
+    const requestResult = await sendRequest({ action: "getUserRequests", regNo, RegNo: regNo });
+    requestsCache = requestResult.success && Array.isArray(requestResult.requests) ? requestResult.requests : [];
 }
 
 function certificatesTableSectionHtml() {
     const docs = [...certificatesCache].reverse();
     const content = docs.length ? `
         <div class="table-wrap">
-            <table class="data-table">
+            <table class="data-table user-requests-table">
                 <thead>
                     <tr>
                         <th>Document Name</th>
+                        <th>Type</th>
                         <th>Upload Date</th>
                         <th>Download</th>
                         <th>Action</th>
@@ -171,10 +176,12 @@ function certificatesTableSectionHtml() {
                 <tbody>
                     ${docs.map((cert) => {
                         const name = cert.CertificateName || cert.certificateName || "Document";
+                        const type = cert.CertificateType || cert.certificateType || "-";
                         const date = formatDateTime(cert.UploadDate || cert.uploadDate);
                         const link = cert.CertificateLink || cert.certificateLink || cert.fileUrl || "";
                         return `<tr>
                             <td>${escapeHtml(name)}</td>
+                            <td>${escapeHtml(type)}</td>
                             <td>${escapeHtml(date)}</td>
                             <td>${link ? `<button type="button" class="btn btn-blue" title="Download" onclick="downloadEncodedDriveFile('${encodeURIComponent(link)}', '${escapeHtml(name)}')">⬇</button>` : "-"}</td>
                             <td>${link ? `<button type="button" class="btn btn-red" onclick="deleteCertificateDocument('${encodeURIComponent(link)}')">Delete</button>` : "-"}</td>
@@ -187,10 +194,120 @@ function certificatesTableSectionHtml() {
     return `<section class="dashboard-top-card"><h2>Certificates & Receipts</h2>${content}</section>`;
 }
 
-function renderDashboardPanel(content) {
+function requestRemark(req) {
+    const status = String(req.Status || "PENDING").toUpperCase();
+    if (status === "COMPLETED") {
+        return `आपका ${req.RequestFor || "document"} अप्लाई कर दिया गया है और रिसिप्ट आपके Certificates & Receipts सेक्शन में अपलोड कर दिया गया है`;
+    }
+    if (status === "ASSIGNED") return "आपका request process में है।";
+    return "आपका request pending है।";
+}
+
+function requestsTableSectionHtml() {
+    const requests = [...requestsCache].reverse();
+    const table = requests.length ? `
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Reg No</th>
+                        <th>Name</th>
+                        <th>DOB</th>
+                        <th>Mobile</th>
+                        <th>Request For</th>
+                        <th>Request Date</th>
+                        <th>Status</th>
+                        <th>Remark</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${requests.map((req) => `<tr>
+                        <td>${escapeHtml(req.RegNo || currentRegNo())}</td>
+                        <td>${escapeHtml(req.ApplicantNmae || currentApplicantName())}</td>
+                        <td>${escapeHtml(formatDate(req.DOB || loggedUser.DOB))}</td>
+                        <td>${escapeHtml(req.MobileNumber || loggedUser.MobileNumber || "-")}</td>
+                        <td>${escapeHtml(req.RequestFor || "-")}</td>
+                        <td>${escapeHtml(formatDate(req.RequestDate))}</td>
+                        <td><span class="status-badge ${escapeHtml(String(req.Status || "PENDING").toLowerCase())}">${escapeHtml(req.Status || "PENDING")}</span></td>
+                        <td class="request-remark-cell">${escapeHtml(requestRemark(req))}</td>
+                    </tr>`).join("")}
+                </tbody>
+            </table>
+        </div>
+    ` : `<div class="document-empty">अभी कोई request submit नहीं है।</div>`;
+    return `<section class="dashboard-top-card">
+        <div class="panel-head">
+            <h2>Your Request</h2>
+            <button type="button" class="btn btn-green" onclick="showRequestForm()">Send Request</button>
+        </div>
+        ${table}
+    </section>`;
+}
+
+function renderDashboardPanel(content, options = {}) {
+    const showRequests = options.showRequests !== false;
     $("dashboardPanel").innerHTML = content
-        ? `${certificatesTableSectionHtml()}<section class="dashboard-inner-panel">${content}</section>`
-        : certificatesTableSectionHtml();
+        ? `${certificatesTableSectionHtml()}${showRequests ? requestsTableSectionHtml() : ""}<section class="dashboard-inner-panel">${content}</section>`
+        : `${certificatesTableSectionHtml()}${requestsTableSectionHtml()}`;
+}
+
+function showRequestForm() {
+    renderDashboardPanel(`
+        <div class="panel-head">
+            <h2>Send Request</h2>
+        </div>
+        <div id="requestFormMsg"></div>
+        <form id="sendRequestForm" novalidate>
+            <div class="form-grid">
+                ${inputField("requestRegNo", "Registration No", currentRegNo())}
+                ${inputField("requestName", "Applicant Name", currentApplicantName())}
+                ${inputField("requestDob", "DOB (DD-MM-YYYY)", userDob())}
+                ${inputField("requestMobile", "Mobile Number", loggedUser.MobileNumber || "")}
+                ${selectField("requestFor", "Request For", REQUEST_OPTIONS[0], REQUEST_OPTIONS)}
+            </div>
+            <div class="button-row bottom-close-row">
+                <button type="submit" class="btn btn-green">Submit Request</button>
+                <button type="button" class="btn btn-light" onclick="closePanel()">Close</button>
+            </div>
+        </form>
+    `, { showRequests: false });
+    regNoFormat("requestRegNo");
+    autoDOB("requestDob");
+    onlyDigits("requestMobile", 10);
+    $("sendRequestForm").addEventListener("submit", submitUserRequestForm);
+}
+
+async function submitUserRequestForm(event) {
+    event.preventDefault();
+    const dob = $("requestDob").value.trim();
+    if (!validateDob(dob)) {
+        showMessage("requestFormMsg", "DOB सही DD-MM-YYYY format में भरें।", true);
+        return;
+    }
+    if (!window.confirm("Do you want to submit this request?")) return;
+    const submitButton = event.target.querySelector("button[type='submit']");
+    const restore = setButtonLoading(submitButton, "Submitting...");
+    const result = await sendRequest({
+        action: "submitUserRequest",
+        RegNo: $("requestRegNo").value.trim(),
+        regNo: $("requestRegNo").value.trim(),
+        ApplicantNmae: $("requestName").value.trim().toUpperCase(),
+        applicantName: $("requestName").value.trim().toUpperCase(),
+        DOB: formatDate(dob),
+        dob: formatDate(dob),
+        MobileNumber: $("requestMobile").value.trim(),
+        mobileNumber: $("requestMobile").value.trim(),
+        RequestFor: $("requestFor").value,
+        requestFor: $("requestFor").value
+    });
+    restore();
+    if (result.success) {
+        await refreshFromServer();
+        renderDashboardPanel("");
+        window.alert("Request submitted successfully.");
+    } else {
+        showMessage("requestFormMsg", result.message || "Request submit failed.", true, 0);
+    }
 }
 
 function showProfileView(skipConfirm = false) {

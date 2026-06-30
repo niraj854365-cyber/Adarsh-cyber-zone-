@@ -1,4 +1,4 @@
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtKd9kfvP5ga7E_LivEhcZNaTMShjbE50-C-zOS6VYuSUk5reK1iEwnt1afYfZfBf3/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbws22P-EcIewUeTWYLnv6V6Ytcx61yqNoBusw_XovcUH9Z5llcC7r6qpGDnvh2Rf-rz/exec";
 
 const FALLBACK_LOGO = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23ffb703'/%3E%3Ctext x='50' y='64' font-size='38' text-anchor='middle' fill='%23064b85' font-family='Arial' font-weight='700'%3EACZ%3C/text%3E%3C/svg%3E";
 
@@ -149,7 +149,7 @@ function formatDate(dateStr) {
         return formatDateObject(dateStr);
     }
     const text = String(dateStr).trim();
-    const ddmmyyyy = text.match(/^(\d{2})[-\/](\d{2})[-\/](\d{4})$/);
+    const ddmmyyyy = text.match(/^(\d{2})[-\/](\d{2})[-\/](\d{4})(?:\s+.*)?$/);
     if (ddmmyyyy) return `${ddmmyyyy[1]}-${ddmmyyyy[2]}-${ddmmyyyy[3]}`;
     const isoDateTime = text.match(/^(\d{4})-(\d{2})-(\d{2})T/);
     if (isoDateTime) {

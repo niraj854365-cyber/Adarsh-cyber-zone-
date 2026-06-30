@@ -2,7 +2,8 @@ const SHEETS = {
   USERS: 'Users',
   CERTIFICATES: 'Certificates',
   ADMINS: 'Admins',
-  PAYMENT: 'Payment'
+  PAYMENT: 'Payment',
+  USER_REQUEST: 'UserRequest'
 };
 
 const USER_HEADERS = [
@@ -10,12 +11,13 @@ const USER_HEADERS = [
   'MotherNameEng', 'MotherNameHindi', 'HusbandNameEng', 'HusbandNameHindi', 'MaritalStatus',
   'DOB', 'Gender', 'CasteCategory', 'CasteName', 'Profession', 'TotalAnnualIncome',
   'MobileNumber', 'Email', 'FullPresentAddress', 'FullPermanentAddress', 'PhotoLink',
-  'SignatureLink', 'AadhaarLink', 'OtherDocumentLink', 'RegistrationSlipLink', 'Status'
+  'SignatureLink', 'AadhaarLink', 'OtherDocumentLink', 'RegistrationSlipLink', 'Status', 'DateOfRegistration'
 ];
 
-const CERT_HEADERS = ['RegNo', 'CertificateName', 'UploadDate', 'CertificateLink'];
+const CERT_HEADERS = ['RegNo', 'CertificateName', 'CertificateType', 'UploadDate', 'CertificateLink'];
 const ADMIN_HEADERS = ['AdminID', 'Password'];
-const PAYMENT_HEADERS = ['RegNo', 'ApplicantNmae', 'TransactionId', 'PaymentSlipLink'];
+const PAYMENT_HEADERS = ['RegNo', 'ApplicantNmae', 'TransactionId', 'PaymentSlipLink', 'PaymentDate'];
+const REQUEST_HEADERS = ['RegNo', 'ApplicantNmae', 'DOB', 'MobileNumber', 'RequestFor', 'RequestDate', 'Status'];
 
 function doGet() {
   return jsonResponse({ success: true, message: 'Adarsh Cyber Zone API is running.' });
@@ -44,6 +46,9 @@ function doPost(e) {
       case 'submitPayment': return jsonResponse(submitPayment(data));
       case 'getPayments': return jsonResponse(getPayments(data));
       case 'deletePayment': return jsonResponse(deleteByRegAndLink(SHEETS.PAYMENT, data));
+      case 'submitUserRequest': return jsonResponse(submitUserRequest(data));
+      case 'getUserRequests': return jsonResponse(getUserRequests(data));
+      case 'updateUserRequestStatus': return jsonResponse(updateUserRequestStatus(data));
       case 'updateStatus': return jsonResponse(updateStatus(data));
       case 'createReceiptPdf': return jsonResponse(createReceiptPdf(data));
       case 'createFilePdf': return jsonResponse(createFilePdf(data));
@@ -61,6 +66,7 @@ function setupSheets() {
   ensureSheet(SHEETS.CERTIFICATES, CERT_HEADERS);
   ensureSheet(SHEETS.ADMINS, ADMIN_HEADERS);
   ensureSheet(SHEETS.PAYMENT, PAYMENT_HEADERS);
+  ensureSheet(SHEETS.USER_REQUEST, REQUEST_HEADERS);
 }
 
 function ensureSheet(name, headers) {
@@ -92,6 +98,7 @@ function registerUser(data) {
     row.ApplicantNmaeEng = data.ApplicantNmaeEng || data.ApplicantNameEng || '';
     row.ApplicantNmaeHindi = data.ApplicantNmaeHindi || data.ApplicantNameHindi || '';
     row.Status = data.Status || 'PENDING';
+    row.DateOfRegistration = formatDateOnly(new Date());
 
     row.PhotoLink = saveBase64File(data.photoBase64, data.photoFileName, regNo, 'Photo') || '';
     row.SignatureLink = saveBase64File(data.signatureBase64, data.signatureFileName, regNo, 'Signature') || '';
@@ -207,7 +214,8 @@ function uploadCertificate(data) {
   const row = {
     RegNo: regNo,
     CertificateName: data.CertificateName || data.certificateName || 'Document',
-    UploadDate: Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd-MM-yyyy HH:mm:ss'),
+    CertificateType: data.CertificateType || data.certificateType || 'सर्टिफिकेट',
+    UploadDate: formatDateOnly(new Date()),
     CertificateLink: link
   };
   appendObject(getSheet(SHEETS.CERTIFICATES), CERT_HEADERS, row);
@@ -233,7 +241,8 @@ function submitPayment(data) {
     RegNo: regNo,
     ApplicantNmae: data.ApplicantNmae || data.applicantName || '',
     TransactionId: data.TransactionId || data.transactionId || '',
-    PaymentSlipLink: link || data.PaymentSlipLink || ''
+    PaymentSlipLink: link || data.PaymentSlipLink || '',
+    PaymentDate: formatDateOnly(new Date())
   };
   appendObject(getSheet(SHEETS.PAYMENT), PAYMENT_HEADERS, row);
   return { success: true, payment: row };
@@ -249,6 +258,64 @@ function updateStatus(data) {
   const found = findUser(data.RegNo || data.regNo);
   if (!found) return { success: false, message: 'User not found.' };
   updateRow(getSheet(SHEETS.USERS), found.row, { Status: data.Status || data.status || 'PENDING' });
+  return { success: true };
+}
+
+function submitUserRequest(data) {
+  const regNo = normalizeRegNo(data.RegNo || data.regNo);
+  const name = String(data.ApplicantNmae || data.applicantName || '').trim().toUpperCase();
+  const dob = normalizeDob(data.DOB || data.dob);
+  const mobile = String(data.MobileNumber || data.mobileNumber || '').trim();
+  const requestFor = String(data.RequestFor || data.requestFor || '').trim();
+  if (!regNo || !name || !dob || !mobile || !requestFor) {
+    return { success: false, message: 'All request fields are required.' };
+  }
+  const found = findUser(regNo);
+  if (!found) return { success: false, message: 'Registration number Users sheet me nahi mila.' };
+  const user = found.data;
+  const userName = String(user.ApplicantNmaeEng || user.ApplicantNameEng || '').trim().toUpperCase();
+  if (userName !== name || normalizeDob(user.DOB) !== dob || String(user.MobileNumber || '').trim() !== mobile) {
+    return { success: false, message: 'User details Users sheet se match nahi kar raha hai.' };
+  }
+  const payments = getObjects(getSheet(SHEETS.PAYMENT));
+  const hasPayment = payments.some(p =>
+    normalizeRegNo(p.RegNo) === regNo &&
+    String(p.ApplicantNmae || '').trim().toUpperCase() === name
+  );
+  if (!hasPayment) return { success: false, message: 'Payment sheet me Reg No aur name match nahi mila.' };
+  const row = {
+    RegNo: regNo,
+    ApplicantNmae: user.ApplicantNmaeEng || data.ApplicantNmae || '',
+    DOB: dob,
+    MobileNumber: mobile,
+    RequestFor: requestFor,
+    RequestDate: formatDateOnly(new Date()),
+    Status: 'PENDING'
+  };
+  appendObject(getSheet(SHEETS.USER_REQUEST), REQUEST_HEADERS, row);
+  return { success: true, request: row };
+}
+
+function getUserRequests(data) {
+  const regNo = normalizeRegNo(data.RegNo || data.regNo);
+  const requests = getObjectsWithRow(getSheet(SHEETS.USER_REQUEST))
+    .filter(r => !regNo || normalizeRegNo(r.RegNo) === regNo)
+    .map(r => {
+      r.DOB = normalizeDob(r.DOB);
+      r.RequestDate = normalizeDateOnly(r.RequestDate);
+      return r;
+    });
+  return { success: true, requests };
+}
+
+function updateUserRequestStatus(data) {
+  const rowNumber = Number(data.rowNumber || data.RowNumber || data._row);
+  const status = String(data.Status || data.status || '').trim().toUpperCase();
+  if (!rowNumber || rowNumber < 2) return { success: false, message: 'Request row not found.' };
+  if (!['PENDING', 'ASSIGNED', 'COMPLETED'].includes(status)) return { success: false, message: 'Invalid request status.' };
+  const sheet = getSheet(SHEETS.USER_REQUEST);
+  if (rowNumber > sheet.getLastRow()) return { success: false, message: 'Request row not found.' };
+  updateRow(sheet, rowNumber, { Status: status });
   return { success: true };
 }
 
@@ -321,6 +388,22 @@ function normalizeDateTime(value) {
   if (!isNaN(parsed.getTime())) {
     return Utilities.formatDate(parsed, 'Asia/Kolkata', 'dd-MM-yyyy HH:mm:ss');
   }
+  return text;
+}
+
+function formatDateOnly(value) {
+  return Utilities.formatDate(value || new Date(), 'Asia/Kolkata', 'dd-MM-yyyy');
+}
+
+function normalizeDateOnly(value) {
+  if (!value) return '';
+  if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value.getTime())) {
+    return formatDateOnly(value);
+  }
+  const text = String(value).trim();
+  if (/^\d{2}[-\/]\d{2}[-\/]\d{4}/.test(text)) return text.slice(0, 10).replace(/\//g, '-');
+  const parsed = new Date(text);
+  if (!isNaN(parsed.getTime())) return formatDateOnly(parsed);
   return text;
 }
 
@@ -444,6 +527,17 @@ function getObjects(sheet) {
   const headers = getHeaders(sheet);
   return sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues()
     .map(row => headers.reduce((obj, h, i) => (obj[h] = row[i], obj), {}));
+}
+
+function getObjectsWithRow(sheet) {
+  if (sheet.getLastRow() < 2) return [];
+  const headers = getHeaders(sheet);
+  return sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues()
+    .map((row, index) => {
+      const obj = headers.reduce((out, h, i) => (out[h] = row[i], out), {});
+      obj._row = index + 2;
+      return obj;
+    });
 }
 
 function appendObject(sheet, headers, obj) {

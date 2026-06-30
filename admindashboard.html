@@ -32,6 +32,10 @@
     <section class="card">
         <h2>Admin Dashboard</h2>
         <div id="adminMsg"></div>
+        <div class="admin-view-switch">
+            <button type="button" class="btn btn-blue" id="viewUsersBtn" onclick="showUsersView()">View User List</button>
+            <button type="button" class="btn btn-light" id="viewRequestsBtn" onclick="showRequestsView()">View User Request</button>
+        </div>
         <div class="admin-filter-row">
             <select id="statusFilter" class="filter-select" onchange="applyFilter(true)" aria-label="Filter users by status">
                 <option value="ALL">Filter: All</option>
@@ -42,11 +46,11 @@
         </div>
         <div class="admin-toolbar">
             <input type="text" id="searchReg" placeholder="Search Reg No, name, mobile" oninput="applyFilter()">
-            <button class="btn btn-green" onclick="loadUsers(event)">Refresh</button>
+            <button class="btn btn-green" onclick="refreshAdminView(event)">Refresh</button>
         </div>
         <div class="table-wrap">
             <table class="data-table" id="usersTable">
-                <thead>
+                <thead id="adminTableHead">
                     <tr>
                         <th>Reg No</th>
                         <th>Name</th>
@@ -72,9 +76,13 @@
 <script>
 let allUsers = [];
 let filteredUsers = [];
+let allRequests = [];
+let currentAdminView = "users";
 let visibleUserCount = 10;
 let selectedUser = null;
 let selectedCertificates = [];
+const CERTIFICATE_NAMES = ["जाती प्रमाण पत्र", "निवास प्रमाण पत्र", "EWS प्रमाण पत्र", "NCL प्रमाण पत्र"];
+const CERTIFICATE_TYPES = ["रिसिप्ट", "सर्टिफिकेट"];
 
 const USER_EDIT_FIELDS = [
     ["ApplicantNmaeEng", "Applicant Name (English)", "text"],
@@ -155,15 +163,85 @@ async function loadUsers(event) {
     restore();
     if (result.success && Array.isArray(result.users)) {
         allUsers = [...result.users].reverse();
-        applyFilter(true);
+        if (currentAdminView === "users") applyFilter(true);
         showMessage("adminMsg", `${allUsers.length} users loaded.`, false);
     } else {
         $("usersTableBody").innerHTML = `<tr><td colspan="6">${escapeHtml(result.message || "Users load failed.")}</td></tr>`;
     }
 }
 
+async function refreshAdminView(event) {
+    if (currentAdminView === "requests") {
+        const restore = event?.target ? setButtonLoading(event.target, "Loading...") : () => {};
+        await loadRequests();
+        restore();
+        return;
+    }
+    await loadUsers(event);
+}
+
+function setAdminView(view) {
+    currentAdminView = view;
+    $("viewUsersBtn").className = view === "users" ? "btn btn-blue" : "btn btn-light";
+    $("viewRequestsBtn").className = view === "requests" ? "btn btn-blue" : "btn btn-light";
+    $("statusFilter").style.display = view === "users" ? "" : "none";
+    $("searchReg").placeholder = view === "users" ? "Search Reg No, name, mobile" : "Search request Reg No, name, mobile";
+}
+
+function showUsersView() {
+    if (currentAdminView !== "users" && !window.confirm("Do you want to view user list?")) return;
+    setAdminView("users");
+    closeAdminPanel();
+    applyFilter(true);
+}
+
+async function showRequestsView() {
+    if (!window.confirm("Do you want to view user requests?")) return;
+    setAdminView("requests");
+    closeAdminPanel();
+    await loadRequests();
+}
+
+async function loadRequests() {
+    $("adminTableHead").innerHTML = `
+        <tr>
+            <th>Reg No</th>
+            <th>Name</th>
+            <th>DOB</th>
+            <th>Mobile</th>
+            <th>Request For</th>
+            <th>Request Date</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    `;
+    $("usersTableBody").innerHTML = '<tr><td colspan="8">Loading requests...</td></tr>';
+    const result = await sendRequest({ action: "getUserRequests" });
+    if (result.success && Array.isArray(result.requests)) {
+        allRequests = [...result.requests].reverse();
+        renderRequestsTable();
+    } else {
+        $("usersTableBody").innerHTML = `<tr><td colspan="8">${escapeHtml(result.message || "Requests load failed.")}</td></tr>`;
+    }
+    $("viewMoreRow").innerHTML = "";
+}
+
 function applyFilter(resetVisible = true) {
+    if (currentAdminView === "requests") {
+        renderRequestsTable();
+        return;
+    }
     if (resetVisible) visibleUserCount = 10;
+    $("adminTableHead").innerHTML = `
+        <tr>
+            <th>Reg No</th>
+            <th>Name</th>
+            <th>DOB</th>
+            <th>Mobile</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    `;
     const search = $("searchReg").value.trim().toUpperCase();
     const statusFilter = $("statusFilter")?.value || "ALL";
     filteredUsers = allUsers.filter((user) => {
@@ -175,6 +253,55 @@ function applyFilter(resetVisible = true) {
     });
     renderUsersTable(filteredUsers.slice(0, visibleUserCount));
     renderViewMore();
+}
+
+function requestStatusSelect(row, status) {
+    const current = String(status || "PENDING").toUpperCase();
+    return `<select class="status-select" onchange="updateRequestStatus(${Number(row)}, this)">
+        <option value="PENDING" ${current === "PENDING" ? "selected" : ""}>Pending</option>
+        <option value="ASSIGNED" ${current === "ASSIGNED" ? "selected" : ""}>Assigned</option>
+        <option value="COMPLETED" ${current === "COMPLETED" ? "selected" : ""}>Completed</option>
+    </select>`;
+}
+
+function certNameSelect(row) {
+    return `<select id="reqCertName-${row}" class="status-select">${CERTIFICATE_NAMES.map((name) => `<option>${escapeHtml(name)}</option>`).join("")}</select>`;
+}
+
+function certTypeSelect(row) {
+    return `<select id="reqCertType-${row}" class="status-select">${CERTIFICATE_TYPES.map((type) => `<option>${escapeHtml(type)}</option>`).join("")}</select>`;
+}
+
+function renderRequestsTable() {
+    const search = $("searchReg").value.trim().toUpperCase();
+    const requests = allRequests.filter((req) => {
+        const haystack = `${req.RegNo || ""} ${req.ApplicantNmae || ""} ${req.MobileNumber || ""} ${req.RequestFor || ""} ${req.Status || ""}`.toUpperCase();
+        return !search || haystack.includes(search);
+    });
+    if (!requests.length) {
+        $("usersTableBody").innerHTML = '<tr><td colspan="8">No user requests found.</td></tr>';
+        return;
+    }
+    $("usersTableBody").innerHTML = requests.map((req) => {
+        const row = Number(req._row);
+        const regNo = req.RegNo || "";
+        return `<tr>
+            <td>${escapeHtml(regNo)}</td>
+            <td>${escapeHtml(req.ApplicantNmae || "-")}</td>
+            <td>${escapeHtml(displayDob(req.DOB))}</td>
+            <td>${escapeHtml(req.MobileNumber || "-")}</td>
+            <td>${escapeHtml(req.RequestFor || "-")}</td>
+            <td>${escapeHtml(formatDate(req.RequestDate))}</td>
+            <td><span class="status-badge ${escapeHtml(String(req.Status || "PENDING").toLowerCase())}">${escapeHtml(req.Status || "PENDING")}</span></td>
+            <td class="table-actions request-actions">
+                ${requestStatusSelect(row, req.Status)}
+                ${certNameSelect(row)}
+                ${certTypeSelect(row)}
+                <input type="file" id="reqCertFile-${row}" class="request-file-input" accept=".pdf,.jpg,.jpeg,.png">
+                <button type="button" class="btn btn-green" onclick="uploadRequestCertificate('${escapeHtml(regNo)}', ${row})">Upload</button>
+            </td>
+        </tr>`;
+    }).join("");
 }
 
 function renderViewMore() {
@@ -353,7 +480,9 @@ function certificateManagerHtml() {
         <div class="notice">
             <strong>Upload Certificate / Receipt</strong>
             <label for="certName" style="margin-top:10px">Document Name</label>
-            <input type="text" id="certName" placeholder="Document name">
+            <select id="certName">${CERTIFICATE_NAMES.map((name) => `<option>${escapeHtml(name)}</option>`).join("")}</select>
+            <label for="certType" style="margin-top:10px">Document Type</label>
+            <select id="certType">${CERTIFICATE_TYPES.map((type) => `<option>${escapeHtml(type)}</option>`).join("")}</select>
             <label for="certFile" style="margin-top:10px">Document File</label>
             <input type="file" id="certFile" accept=".pdf,.jpg,.jpeg,.png">
             <button class="btn btn-green full-btn" style="margin-top:12px" onclick="uploadCertificate(event)">Upload</button>
@@ -368,13 +497,15 @@ function documentsTableHtml() {
     const docs = [...selectedCertificates].reverse();
     return `
         <table class="data-table">
-            <thead><tr><th>Document Name</th><th>Upload Date</th><th>Download</th><th>Action</th></tr></thead>
+            <thead><tr><th>Document Name</th><th>Type</th><th>Upload Date</th><th>Download</th><th>Action</th></tr></thead>
             <tbody>
                 ${docs.map((cert) => {
                     const link = cert.CertificateLink || cert.certificateLink || cert.fileUrl || "#";
+                    const uploadDate = formatDate(cert.UploadDate || cert.uploadDate);
                     return `<tr>
                         <td>${escapeHtml(cert.CertificateName || cert.certificateName || "Document")}</td>
-                        <td>${escapeHtml(cert.UploadDate || cert.uploadDate || "-")}</td>
+                        <td>${escapeHtml(cert.CertificateType || cert.certificateType || "-")}</td>
+                        <td>${escapeHtml(uploadDate)}</td>
                         <td><button type="button" class="btn btn-blue" title="Download" onclick="downloadEncodedDriveFile('${encodeURIComponent(link)}', '${escapeHtml(cert.CertificateName || cert.certificateName || "Document")}')">⬇</button></td>
                         <td><button class="btn btn-red" onclick="deleteDocument('${escapeHtml(link)}')">Delete</button></td>
                     </tr>`;
@@ -387,9 +518,10 @@ function documentsTableHtml() {
 async function uploadCertificate(event) {
     if (!selectedUser) return;
     const certName = $("certName").value.trim();
+    const certType = $("certType").value.trim();
     const file = $("certFile").files[0];
-    if (!certName || !file) {
-        showMessage("adminMsg", "Document name aur file select karein.", true);
+    if (!certName || !certType || !file) {
+        showMessage("adminMsg", "Document name, type aur file select karein.", true);
         return;
     }
     if (!window.confirm("Do you want to upload this document?")) return;
@@ -401,6 +533,8 @@ async function uploadCertificate(event) {
         regNo,
         CertificateName: certName,
         certificateName: certName,
+        CertificateType: certType,
+        certificateType: certType,
         fileBase64: await fileToBase64(file),
         fileName: file.name
     });
@@ -409,6 +543,54 @@ async function uploadCertificate(event) {
         await selectUser(regNo);
         renderUserView();
         window.alert("Document uploaded successfully.");
+    } else {
+        showMessage("adminMsg", result.message || "Upload failed.", true);
+    }
+}
+
+async function updateRequestStatus(rowNumber, selectEl) {
+    const status = selectEl.value;
+    const previous = allRequests.find((req) => Number(req._row) === Number(rowNumber))?.Status || "PENDING";
+    if (String(previous).toUpperCase() === status) return;
+    if (!window.confirm(`Do you want to set request status ${status}?`)) {
+        selectEl.value = String(previous).toUpperCase();
+        return;
+    }
+    const result = await sendRequest({ action: "updateUserRequestStatus", rowNumber, Status: status, status });
+    if (result.success) {
+        const req = allRequests.find((item) => Number(item._row) === Number(rowNumber));
+        if (req) req.Status = status;
+        renderRequestsTable();
+        window.alert("Request status updated.");
+    } else {
+        selectEl.value = String(previous).toUpperCase();
+        showMessage("adminMsg", result.message || "Request status update failed.", true);
+    }
+}
+
+async function uploadRequestCertificate(regNo, rowNumber) {
+    const certName = $(`reqCertName-${rowNumber}`).value;
+    const certType = $(`reqCertType-${rowNumber}`).value;
+    const file = $(`reqCertFile-${rowNumber}`).files[0];
+    if (!certName || !certType || !file) {
+        showMessage("adminMsg", "Certificate/receipt name, type aur file select karein.", true);
+        return;
+    }
+    if (!window.confirm("Do you want to upload this certificate/receipt?")) return;
+    const result = await sendRequest({
+        action: "uploadCertificate",
+        RegNo: regNo,
+        regNo,
+        CertificateName: certName,
+        certificateName: certName,
+        CertificateType: certType,
+        certificateType: certType,
+        fileBase64: await fileToBase64(file),
+        fileName: file.name
+    });
+    if (result.success) {
+        window.alert("Document uploaded. Ab status completed select kar sakte hain.");
+        await loadRequests();
     } else {
         showMessage("adminMsg", result.message || "Upload failed.", true);
     }
