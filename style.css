@@ -930,7 +930,6 @@ small {
     width: 260px;
     max-width: 260px;
     line-height: 1.45;
-    line-width : 5.45;
 }
 
 .user-requests-table {
@@ -972,21 +971,17 @@ body:has(.dashboard-shell) .table-wrap {
 }
 
 body:has(.dashboard-shell) .data-table {
-    min-width: 0;
-    table-layout: fixed;
+    width:100%;
+    min-width: 800px;
+    table-layout: auto;
 }
 
 body:has(.dashboard-shell) .data-table th,
 body:has(.dashboard-shell) .data-table td {
     overflow-wrap: anywhere;
     word-break: break-word;
-      font-size: 13px;
+    font-size: 13px;
     padding: 8px 6px;
-}
-.user-requests-table th:nth-child(7),
-.user-requests-table td:nth-child(7){
-    width:90px;
-    font-size: 5px;
 }
 
 body:has(.dashboard-shell) .user-requests-table th:nth-child(1),

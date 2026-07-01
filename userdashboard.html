@@ -207,7 +207,7 @@ function requestsTableSectionHtml() {
     const requests = [...requestsCache].reverse();
     const table = requests.length ? `
         <div class="table-wrap">
-            <table class="data-table">
+           <table class="data-table user-requests-table">
                 <thead>
                     <tr>
                         <th>Reg No</th>
@@ -242,7 +242,7 @@ function requestsTableSectionHtml() {
         </div>
         ${table}
     </section>`;
-}
+} 
 
 function renderDashboardPanel(content, options = {}) {
     const showRequests = options.showRequests !== false;
