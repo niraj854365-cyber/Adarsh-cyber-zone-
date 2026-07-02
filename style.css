@@ -315,6 +315,7 @@ nav a.active {
     grid-template-columns: repeat(4, minmax(240px, 1fr));
     gap: 14px;
     margin-top: 18px;
+    align-items: stretch;
 }
 
 .service-tile,
@@ -327,6 +328,8 @@ nav a.active {
 
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;
+    min-height: 140px;
     gap: 2px;
 }
 
