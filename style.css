@@ -262,18 +262,28 @@ nav a.active {
     color: var(--primary-dark);
     margin-bottom: 14px;
 }
+.hero-panel h3 {
+    font-size: clamp(16px, 3vw, 22px);
+    line-height: 1.3;
+    color: #d97706;  
+    margin: 10px 0 12px;
+}
 
 .hero-panel p,
 .lead {
-    color: var(--muted);
-    font-size: 20px;
+    color: #1900ff;
+    font-size: 18px;
+    line-height: 1.4;
+    margin-bottom: 5px;
+    font-weight: 600;
+    
 }
 
 .hero-actions {
-    margin-top: 20px;
+    margin-top: 18px;
     display: flex;
     gap: 10px;
-    flex-wrap: initial;
+    flex-wrap: wrap;
 }
 
 .hero-side {
@@ -305,7 +315,7 @@ nav a.active {
 .card h2,
 .section-title {
     color: var(--primary-dark);
-    font-size: clamp(24px, 3vw, 34px);
+     font-size: clamp(18px, 2vw, 24px);
     margin-bottom: 16px;
     line-height: 1.2;
 }
