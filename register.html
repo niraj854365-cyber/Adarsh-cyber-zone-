@@ -26,7 +26,7 @@
 <main class="container">
     <section class="card">
         <h2>Registration Form</h2>
-        <div class="notice">Fill all required fields carefully. DOB format should be DD-MM-YYYY.</div>
+        <div class="notice">Please fill all required fields carefully. जन्म तिथि (Date of Birth) केवल DD-MM-YYYY प्रारूप में दर्ज करें।</div>
 
         <div class="progress-shell" aria-live="polite">
             <div class="progress-bar"><div class="progress-fill" id="formProgress"></div></div>
@@ -35,35 +35,44 @@
 
         <form id="registerForm" novalidate>
             <div class="form-grid">
-                <div class="form-group"><label for="applicantNameEng">* Applicant Name (English)</label><input type="text" id="applicantNameEng" class="autoUpper" required></div>
-                <div class="form-group"><label for="applicantNameHindi">Applicant Name (Hindi)</label><input type="text" id="applicantNameHindi"></div>
-                <div class="form-group"><label for="fatherNameEng">* Father Name (English)</label><input type="text" id="fatherNameEng" class="autoUpper" required></div>
-                <div class="form-group"><label for="fatherNameHindi">Father Name (Hindi)</label><input type="text" id="fatherNameHindi"></div>
-                <div class="form-group"><label for="motherNameEng">* Mother Name (English)</label><input type="text" id="motherNameEng" class="autoUpper" required></div>
-                <div class="form-group"><label for="motherNameHindi">Mother Name (Hindi)</label><input type="text" id="motherNameHindi"></div>
-                <div class="form-group"><label for="husbandNameEng">Husband Name (English)</label><input type="text" id="husbandNameEng" class="autoUpper"></div>
-                <div class="form-group"><label for="husbandNameHindi">Husband Name (Hindi)</label><input type="text" id="husbandNameHindi"></div>
-                <div class="form-group"><label for="maritalStatus">* Marital Status</label><select id="maritalStatus" required><option value="">Select</option><option>MARRIED</option><option>UNMARRIED</option><option>DIVORCED</option><option>WIDOW</option></select></div>
-                <div class="form-group"><label for="dob">* DOB (DD-MM-YYYY)</label><input type="text" id="dob" maxlength="10" placeholder="DD-MM-YYYY" required></div>
-                <div class="form-group"><label for="gender">* Gender</label><select id="gender" required><option value="">Select</option><option>MALE</option><option>FEMALE</option><option>OTHER</option></select></div>
-                <div class="form-group"><label for="casteCategory">* Caste Category</label><select id="casteCategory" required><option value="">Select</option><option>(BC-I) / अत्यंत पिछड़ा वर्ग</option>
+                <div class="form-group"><label for="applicantNameEng">* Applicant Name / English</label><input type="text" id="applicantNameEng" class="autoUpper" required></div>
+                <div class="form-group"><label for="applicantNameHindi">आवेदक का नाम / हिन्दी</label><input type="text" id="applicantNameHindi"></div>
+                <div class="form-group"><label for="fatherNameEng">* Father Name / English</label><input type="text" id="fatherNameEng" class="autoUpper" required></div>
+                <div class="form-group"><label for="fatherNameHindi">पिता का नाम / हिन्दी</label><input type="text" id="fatherNameHindi"></div>
+                <div class="form-group"><label for="motherNameEng">* Mother Name / English</label><input type="text" id="motherNameEng" class="autoUpper" required></div>
+                <div class="form-group"><label for="motherNameHindi">माता का नाम / हिन्दी</label><input type="text" id="motherNameHindi"></div>
+                <div class="form-group"><label for="husbandNameEng">Husband Name / English</label><input type="text" id="husbandNameEng" class="autoUpper"></div>
+                <div class="form-group"><label for="husbandNameHindi">पति का नाम / हिन्दी</label><input type="text" id="husbandNameHindi"></div>
+               <div class="form-group">
+    <label for="maritalStatus">* वैवाहिक स्थिति (Marital Status)</label>
+    <select id="maritalStatus" required>
+        <option value="">चयन करें (Select)</option>
+        <option>MARRIED / विवाहित</option>
+        <option>UNMARRIED / अविवाहित</option>
+        <option>DIVORCED / तलाकशुदा</option>
+        <option>WIDOW / विधवा</option>
+    </select>
+</div>
+                <div class="form-group"><label for="dob">*जन्म तिथि / DOB (DD-MM-YYYY)</label><input type="text" id="dob" maxlength="10" placeholder="DD-MM-YYYY" required></div>
+                <div class="form-group"><label for="gender">*लिंग / Gender</label><select id="gender" required><option value=""> चयन करें (Select)</option><option>MALE / पुरुष</option><option>FEMALE / महिला</option><option>OTHER / अन्य</option></select></div>
+                <div class="form-group"><label for="casteCategory">*जाति श्रेणी / Caste Category</label><select id="casteCategory" required><option value="">चयन करें (Select)</option><option>(BC-I) / अत्यंत पिछड़ा वर्ग</option>
 <option> (BC-II) / पिछड़ा वर्ग (अनुसूची-2)</option>
 <option> (ST) / अनुसूचित जनजाति</option>
 <option> (SC) / अनुसूचित जाति</option>
 <option> (GENERAL) / गैर आरक्षित</option></select></div>
-                <div class="form-group"><label for="casteName">* Caste Name</label><input type="text" id="casteName" class="autoUpper" required></div>
-                <div class="form-group"><label for="profession">* Profession</label><select id="profession" required><option value="">Select</option><option>STUDENT</option><option>FARMER</option><option>BUSINESS</option><option>PRIVATE JOB</option><option>GOVT JOB</option><option>LABOUR</option><option>OTHER</option></select></div>
-                <div class="form-group"><label for="annualIncome">* Total Annual Income</label><input type="text" id="annualIncome" maxlength="8" placeholder="325000" required></div>
-                <div class="form-group"><label for="mobile">* Mobile Number</label><input type="tel" id="mobile" maxlength="10" placeholder="9876543210" required></div>
-                <div class="form-group"><label for="email">* Email Address</label><input type="email" id="email" placeholder="example@gmail.com" required></div>
+                <div class="form-group"><label for="casteName">*जाति का नाम / Caste Name</label><input type="text" id="casteName" class="autoUpper" required></div>
+                <div class="form-group"><label for="profession">*व्यवसाय / Profession</label><select id="profession" required><option value="">चयन करें (Select)</option><option>STUDENT / छात्र</option><option>FARMER / किसान</option><option>BUSINESS / व्यवसाय</option><option>PRIVATE JOB / निजी नौकरी</option><option>GOVT JOB / सरकारी नौकरी</option><option>LABOUR / मजदूर</option><option>OTHER / अन्य</option></select></div>
+                <div class="form-group"><label for="annualIncome">*परिवार की वार्षिक आय / Family Income</label><input type="text" id="annualIncome" maxlength="8" placeholder="325000" required></div>
+                <div class="form-group"><label for="mobile">* मोबाइल नंबर / Mobile Number</label><input type="tel" id="mobile" maxlength="10" placeholder="9876543210" required></div>
+                <div class="form-group"><label for="email">ईमेल पता / Email Address (Optional)</label><input type="email" id="email" placeholder="example@gmail.com"></div>
 
-                <div class="form-section-title">Present Address</div>
-                <div class="form-group"><label for="presentVillage">* Village/Town</label><input type="text" id="presentVillage" class="autoUpper" required></div>
-                <div class="form-group"><label for="presentPostOffice">* Post Office</label><input type="text" id="presentPostOffice" class="autoUpper" required></div>
-                <div class="form-group"><label for="presentPanchayat">* Panchayat</label><input type="text" id="presentPanchayat" class="autoUpper" required></div>
-                <div class="form-group"><label for="presentBlock">* Block</label><input type="text" id="presentBlock" class="autoUpper" required></div>
-                <div class="form-group"><label for="presentPoliceStation">* Police Station</label><input type="text" id="presentPoliceStation" class="autoUpper" required></div>
-                <div class="form-group"><label for="presentDistrict">* District</label><select id="presentDistrict" required><option value="">Select District</option> <option>ARARIA / अररिया</option>
+                <div class="form-section-title">वर्तमान पता / Present Address</div>
+                <div class="form-group"><label for="presentVillage">*गाँव / शहर Village/Town</label><input type="text" id="presentVillage" class="autoUpper" required></div>
+                <div class="form-group"><label for="presentPostOffice">*डाकघर / Post Office</label><input type="text" id="presentPostOffice" class="autoUpper" required></div>
+                <div class="form-group"><label for="presentPanchayat">*पंचायत / Panchayat</label><input type="text" id="presentPanchayat" class="autoUpper" required></div>
+                <div class="form-group"><label for="presentBlock">*प्रखंड / Block</label><input type="text" id="presentBlock" class="autoUpper" required></div>
+                <div class="form-group"><label for="presentPoliceStation">* थाना / Police Station</label><input type="text" id="presentPoliceStation" class="autoUpper" required></div>
+                <div class="form-group"><label for="presentDistrict">*जिला चुनें / Select District</label><select id="presentDistrict" required><option value="">Select District</option> <option>ARARIA / अररिया</option>
 <option>ARWAL / अरवल</option>
 <option>AURANGABAD / औरंगाबाद</option>
 <option>BANKA / बांका</option>
@@ -102,20 +111,20 @@
 <option>VAISHALI / वैशाली</option>
 <option>WEST CHAMPARAN / पश्चिमी चंपारण</option>
     </select></div>
-                <div class="form-group"><label for="presentSubDistrict">* Sub District</label><input type="text" id="presentSubDistrict" class="autoUpper" required></div>
-                <div class="form-group"><label for="presentWardNo">* Ward No</label><input type="text" id="presentWardNo" required></div>
-                <div class="form-group"><label for="presentPinCode">* Pin Code</label><input type="text" id="presentPinCode" maxlength="6" placeholder="800001" required></div>
+                <div class="form-group"><label for="presentSubDistrict">*अनुमंडल / Sub District</label><input type="text" id="presentSubDistrict" class="autoUpper" required></div>
+                <div class="form-group"><label for="presentWardNo">*वार्ड संख्या / Ward No</label><input type="text" id="presentWardNo" required></div>
+                <div class="form-group"><label for="presentPinCode">*पिन कोड / Pin Code</label><input type="text" id="presentPinCode" maxlength="6" placeholder="800001" required></div>
 
-                <div class="form-section-title">Permanent Address</div>
+                <div class="form-section-title">स्थायी पता / Permanent Address</div>
                 <div class="form-group full-span">
-                    <label class="checkbox-line"><input type="checkbox" id="sameAsPresent"> Same as Present Address</label>
+                    <label class="checkbox-line"><input type="checkbox" id="sameAsPresent">वर्तमान पते के समान / Same as Present Address</label>
                 </div>
-                <div class="form-group"><label for="permanentVillage">* Village/Town</label><input type="text" id="permanentVillage" class="autoUpper permanent-address" required></div>
-                <div class="form-group"><label for="permanentPostOffice">* Post Office</label><input type="text" id="permanentPostOffice" class="autoUpper permanent-address" required></div>
-                <div class="form-group"><label for="permanentPanchayat">* Panchayat</label><input type="text" id="permanentPanchayat" class="autoUpper permanent-address" required></div>
-                <div class="form-group"><label for="permanentBlock">* Block</label><input type="text" id="permanentBlock" class="autoUpper permanent-address" required></div>
-                <div class="form-group"><label for="permanentPoliceStation">* Police Station</label><input type="text" id="permanentPoliceStation" class="autoUpper permanent-address" required></div>
-                <div class="form-group"><label for="permanentDistrict">* District</label><select id="permanentDistrict" class="permanent-address" required><option value="">Select District</option> <option>ARARIA / अररिया</option>
+                <div class="form-group"><label for="permanentVillage">*गाँव / शहर Village/Town</label><input type="text" id="permanentVillage" class="autoUpper permanent-address" required></div>
+                <div class="form-group"><label for="permanentPostOffice">*डाकघर / Post Office</label><input type="text" id="permanentPostOffice" class="autoUpper permanent-address" required></div>
+                <div class="form-group"><label for="permanentPanchayat">*पंचायत / Panchayat</label><input type="text" id="permanentPanchayat" class="autoUpper permanent-address" required></div>
+                <div class="form-group"><label for="permanentBlock">*प्रखंड / Block</label><input type="text" id="permanentBlock" class="autoUpper permanent-address" required></div>
+                <div class="form-group"><label for="permanentPoliceStation">*थाना / Police Station</label><input type="text" id="permanentPoliceStation" class="autoUpper permanent-address" required></div>
+                <div class="form-group"><label for="permanentDistrict">*जिला चुनें / Select District</label><select id="permanentDistrict" class="permanent-address" required><option value="">Select District</option> <option>ARARIA / अररिया</option>
 <option>ARWAL / अरवल</option>
 <option>AURANGABAD / औरंगाबाद</option>
 <option>BANKA / बांका</option>
@@ -154,15 +163,15 @@
 <option>VAISHALI / वैशाली</option>
 <option>WEST CHAMPARAN / पश्चिमी चंपारण</option>
         </select></div>
-                <div class="form-group"><label for="permanentSubDistrict">* Sub District</label><input type="text" id="permanentSubDistrict" class="autoUpper permanent-address" required></div>
-                <div class="form-group"><label for="permanentWardNo">* Ward No</label><input type="text" id="permanentWardNo" class="permanent-address" required></div>
-                <div class="form-group"><label for="permanentPinCode">* Pin Code</label><input type="text" id="permanentPinCode" class="permanent-address" maxlength="6" placeholder="800001" required></div>
+                <div class="form-group"><label for="permanentSubDistrict">*अनुमंडल / Sub District</label><input type="text" id="permanentSubDistrict" class="autoUpper permanent-address" required></div>
+                <div class="form-group"><label for="permanentWardNo">* वार्ड संख्या / Ward No</label><input type="text" id="permanentWardNo" class="permanent-address" required></div>
+                <div class="form-group"><label for="permanentPinCode">*पिन कोड / Pin Code</label><input type="text" id="permanentPinCode" class="permanent-address" maxlength="6" placeholder="800001" required></div>
 
-                <div class="form-section-title">Documents</div>
-                <div class="form-group"><label for="photo">* Photo (JPG/PNG, max 2MB)</label><input type="file" id="photo" accept="image/jpeg,image/png" required></div>
-                <div class="form-group"><label for="signature">* Signature (JPG/PNG, max 1MB)</label><input type="file" id="signature" accept="image/jpeg,image/png" required></div>
-                <div class="form-group"><label for="aadhaar">* Aadhaar Card (JPG/PNG/PDF, max 3MB)</label><input type="file" id="aadhaar" accept=".jpg,.jpeg,.png,.pdf" required></div>
-                <div class="form-group"><label for="otherDocument">Other Document (optional, max 3MB)</label><input type="file" id="otherDocument" accept=".jpg,.jpeg,.png,.pdf"></div>
+                <div class="form-section-title">दस्तावेज / Documents</div>
+                <div class="form-group"><label for="photo">* आवेदक का फोटो / Applicant's Photo (JPG/PNG, max 2MB)</label><input type="file" id="photo" accept="image/jpeg,image/png" required></div>
+                <div class="form-group"><label for="signature">* हस्ताक्षर / Signature (JPG/PNG, max 1MB)</label><input type="file" id="signature" accept="image/jpeg,image/png" required></div>
+                <div class="form-group"><label for="aadhaar">* आधार कार्ड / Aadhaar Card (JPG/PNG/PDF, max 3MB)</label><input type="file" id="aadhaar" accept=".jpg,.jpeg,.png,.pdf" required></div>
+                <div class="form-group"><label for="otherDocument"> * अन्य दस्तावेज / Other Document (optional, max 3MB)</label><input type="file" id="otherDocument" accept=".jpg,.jpeg,.png,.pdf"></div>
             </div>
 
             <div class="preview-grid" id="filePreview"></div>
@@ -315,7 +324,7 @@ function validateForm() {
         ["applicantNameEng", "Applicant Name"], ["fatherNameEng", "Father Name"], ["motherNameEng", "Mother Name"],
         ["maritalStatus", "Marital Status"], ["dob", "DOB"], ["gender", "Gender"], ["casteCategory", "Caste Category"],
         ["casteName", "Caste Name"], ["profession", "Profession"], ["annualIncome", "Annual Income"], ["mobile", "Mobile"],
-        ["email", "Email"], ["presentVillage", "Present Village"], ["presentPostOffice", "Present Post Office"],
+        ["presentVillage", "Present Village"], ["presentPostOffice", "Present Post Office"],
         ["presentPanchayat", "Present Panchayat"], ["presentBlock", "Present Block"], ["presentPoliceStation", "Present Police Station"],
         ["presentDistrict", "Present District"], ["presentSubDistrict", "Present Sub District"], ["presentWardNo", "Present Ward No"],
         ["presentPinCode", "Present Pin Code"]
@@ -332,13 +341,17 @@ function validateForm() {
         );
     }
     for (const [id, label] of required) {
-        if (!$(id).value.trim()) return `${label} bharen.`;
+        if (!$(id).value.trim()) return `${label} Enter करें.`;
     }
     if (!validateDob($("dob").value.trim())) return "DOB DD-MM-YYYY format me bharen.";
     if (!/^[6-9]\d{9}$/.test($("mobile").value.trim())) return "Mobile Number 10 digits ka aur 6-9 se shuru hona chahiye.";
     if (!/^\d{6}$/.test($("presentPinCode").value.trim())) return "Present Pin Code 6 digits ka hona chahiye.";
     if (!/^\d{6}$/.test($("permanentPinCode").value.trim())) return "Permanent Pin Code 6 digits ka hona chahiye.";
-    if (!/^[^\s@]+@([^\s@.,]+\.)+[^\s@]{2,}$/.test($("email").value.trim())) return "Email sahi bharen.";
+    const email = $("email").value.trim();
+
+if (email && !/^[^\s@]+@([^\s@.,]+\.)+[^\s@]{2,}$/.test(email)) {
+    return "Email sahi bharen.";
+}
     if (Number($("annualIncome").value) <= 0) return "Annual Income sahi bharen.";
 
     return validateFile("photo", 2, ["jpg", "jpeg", "png"]) ||

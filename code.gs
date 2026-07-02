@@ -87,10 +87,12 @@ function registerUser(data) {
   lock.waitLock(10000);
   try {
     const sheet = getSheet(SHEETS.USERS);
-    const regNo = normalizeRegNo(data.RegNo || data.regNo || nextRegNo());
-    if (findRowByValue(sheet, 'RegNo', regNo).row > 0) {
-      return { success: false, message: 'Registration number already exists.' };
-    }
+   let regNo;
+
+do {
+  regNo = nextRegNo();
+} while (findRowByValue(sheet, 'RegNo', regNo).row > 0);
+   
 
     const row = {};
     USER_HEADERS.forEach(h => row[h] = data[h] || '');
@@ -348,18 +350,26 @@ function findUser(regNo) {
 }
 
 function nextRegNo() {
-  const users = getObjects(getSheet(SHEETS.USERS));
-  const max = users.reduce((n, u) => {
-    const m = String(u.RegNo || '').match(/ACZ(\d+)/);
-    return m ? Math.max(n, Number(m[1])) : n;
-  }, 0);
-  return 'ACZ' + String(max + 1).padStart(7, '0');
-}
+  const sheet = getSheet(SHEETS.USERS);
 
-function normalizeRegNo(value) {
-  return String(value || '').trim().toUpperCase();
-}
+  const data = sheet.getRange(2, 1, Math.max(sheet.getLastRow() - 1, 0), 1).getValues();
 
+  let maxNo = 0;
+
+  data.forEach(row => {
+    const reg = String(row[0] || "").trim();
+    const match = reg.match(/^ACZ(\d+)$/);
+
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (num > maxNo) {
+        maxNo = num;
+      }
+    }
+  });
+
+  return "ACZ" + String(maxNo + 1).padStart(7, "0");
+}
 function normalizeDob(value) {
   if (!value) return '';
   if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value.getTime())) {
@@ -580,4 +590,8 @@ function escapeHtmlGs(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+ function setInitialRegNo() {
+  PropertiesService.getScriptProperties()
+    .setProperty("LAST_REG_NO", "3");
 }
