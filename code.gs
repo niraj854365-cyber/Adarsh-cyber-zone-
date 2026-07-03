@@ -370,6 +370,11 @@ function nextRegNo() {
 
   return "ACZ" + String(maxNo + 1).padStart(7, "0");
 }
+
+function normalizeRegNo(value) {
+  return String(value || '').trim().toUpperCase();
+}
+
 function normalizeDob(value) {
   if (!value) return '';
   if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value.getTime())) {

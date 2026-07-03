@@ -315,7 +315,7 @@ nav a.active {
 .card h2,
 .section-title {
     color: var(--primary-dark);
-     font-size: clamp(18px, 2vw, 24px);
+    font-size: clamp(18px, 2vw, 24px);
     margin-bottom: 16px;
     line-height: 1.2;
 }
@@ -359,6 +359,23 @@ nav a.active {
     margin-top: 0;
     line-height: 1.4;
     color: var(--muted);
+}
+
+.rtps-services-panel {
+    padding: clamp(18px, 3vw, 32px);
+    border-top: 1px solid var(--line);
+}
+
+.rtps-services-panel .section-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.rtps-services-panel .service-tile {
+    background: var(--surface-soft);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+    min-height: 140px;
 }
 .form-grid {
     display: grid;
@@ -837,7 +854,7 @@ small {
 .data-table th,
 .data-table td {
     border: 1px solid var(--line);
-    padding: 10px;
+    padding: 12px;
     text-align: left;
     vertical-align: top;
 }
@@ -2271,6 +2288,81 @@ body:has(.dashboard-shell) .user-requests-table td:nth-child(7) {
 
     body:has(.portal-grid) .steps {
         padding-left: 18px;
+    }
+}
+
+/* Mobile fit safeguards for all pages */
+@media (max-width: 900px) {
+    .rtps-services-panel .section-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    html,
+    body {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .top-header,
+    nav,
+    .container,
+    .site-footer,
+    .portal-box {
+        width: min(100% - 20px, 1180px);
+    }
+
+    .card,
+    .auth-card,
+    .info-panel,
+    .dashboard-top-card,
+    .dashboard-inner-panel,
+    .pvc-card,
+    .portal-box {
+        max-width: 100%;
+    }
+
+    input,
+    select,
+    textarea,
+    button,
+    .btn {
+        max-width: 100%;
+    }
+
+    .table-wrap {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .data-table {
+        width: 100%;
+    }
+
+    .panel-head {
+        flex-wrap: wrap;
+    }
+
+    .button-row {
+        gap: 8px;
+    }
+}
+
+@media (max-width: 520px) {
+    .rtps-services-panel .section-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rtps-services-panel {
+        padding: 16px;
+    }
+
+    .service-tile,
+    .stat-tile,
+    .document-empty {
+        min-height: auto;
     }
 }
 -----------------------------------------------
