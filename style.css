@@ -2470,6 +2470,92 @@ body:has(.dashboard-shell) .user-requests-table td:nth-child(7) {
         font-size: 12px;
         overflow-wrap: anywhere;
     }
+
+    body:has(.dashboard-shell) .data-table {
+        min-width: 0;
+        table-layout: auto;
+    }
+
+    body:has(.dashboard-shell) .user-certificates-table,
+    body:has(.dashboard-shell) .user-requests-table,
+    body:has(.dashboard-shell) .user-certificates-table thead,
+    body:has(.dashboard-shell) .user-requests-table thead,
+    body:has(.dashboard-shell) .user-certificates-table tbody,
+    body:has(.dashboard-shell) .user-requests-table tbody,
+    body:has(.dashboard-shell) .user-certificates-table tr,
+    body:has(.dashboard-shell) .user-requests-table tr,
+    body:has(.dashboard-shell) .user-certificates-table td,
+    body:has(.dashboard-shell) .user-requests-table td {
+        display: block;
+        width: 100%;
+    }
+
+    body:has(.dashboard-shell) .user-certificates-table thead,
+    body:has(.dashboard-shell) .user-requests-table thead {
+        display: none;
+    }
+
+    body:has(.dashboard-shell) .user-certificates-table tr,
+    body:has(.dashboard-shell) .user-requests-table tr {
+        margin-bottom: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: #ffffff;
+    }
+
+    body:has(.dashboard-shell) .user-certificates-table td,
+    body:has(.dashboard-shell) .user-requests-table td {
+        display: grid;
+        grid-template-columns: minmax(112px, 38%) minmax(0, 1fr);
+        gap: 10px;
+        border: 0;
+        border-bottom: 1px solid var(--line);
+        padding: 9px 10px;
+        font-size: 13px;
+        line-height: 1.35;
+        word-break: normal;
+        overflow-wrap: anywhere;
+        align-items: center;
+    }
+
+    body:has(.dashboard-shell) .user-certificates-table td:last-child,
+    body:has(.dashboard-shell) .user-requests-table td:last-child {
+        border-bottom: 0;
+    }
+
+    body:has(.dashboard-shell) .user-certificates-table td::before,
+    body:has(.dashboard-shell) .user-requests-table td::before {
+        color: var(--primary-dark);
+        font-weight: 900;
+        line-height: 1.2;
+    }
+
+    body:has(.dashboard-shell) .user-certificates-table td:nth-child(1)::before { content: "Document"; }
+    body:has(.dashboard-shell) .user-certificates-table td:nth-child(2)::before { content: "Type"; }
+    body:has(.dashboard-shell) .user-certificates-table td:nth-child(3)::before { content: "Upload Date"; }
+    body:has(.dashboard-shell) .user-certificates-table td:nth-child(4)::before { content: "Download"; }
+    body:has(.dashboard-shell) .user-certificates-table td:nth-child(5)::before { content: "Action"; }
+
+    body:has(.dashboard-shell) .user-requests-table td:nth-child(1)::before { content: "Reg No"; }
+    body:has(.dashboard-shell) .user-requests-table td:nth-child(2)::before { content: "Name"; }
+    body:has(.dashboard-shell) .user-requests-table td:nth-child(3)::before { content: "DOB"; }
+    body:has(.dashboard-shell) .user-requests-table td:nth-child(4)::before { content: "Mobile"; }
+    body:has(.dashboard-shell) .user-requests-table td:nth-child(5)::before { content: "Request For"; }
+    body:has(.dashboard-shell) .user-requests-table td:nth-child(6)::before { content: "Request Date"; }
+    body:has(.dashboard-shell) .user-requests-table td:nth-child(7)::before { content: "Status"; }
+    body:has(.dashboard-shell) .user-requests-table td:nth-child(8)::before { content: "Remark"; }
+
+    body:has(.dashboard-shell) .request-remark-cell {
+        width: auto;
+        max-width: none;
+    }
+
+    body:has(.dashboard-shell) .user-certificates-table .btn,
+    body:has(.dashboard-shell) .user-requests-table .btn {
+        width: max-content;
+        min-width: 42px;
+    }
 }
 
 @media (max-width: 420px) {
