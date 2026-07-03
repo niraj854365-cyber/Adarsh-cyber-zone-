@@ -2365,4 +2365,138 @@ body:has(.dashboard-shell) .user-requests-table td:nth-child(7) {
         min-height: auto;
     }
 }
+
+/* Site-wide mobile responsiveness */
+@media (max-width: 1024px) {
+    .section-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rtps-services-panel .section-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .section-grid,
+    .rtps-services-panel .section-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .top-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 10px;
+    }
+
+    .top-header img {
+        width: 64px;
+        height: 64px;
+    }
+
+    .home-header-info {
+        width: 100%;
+        max-width: none;
+        margin-left: 0;
+        text-align: center;
+        font-size: 12px;
+    }
+
+    .brand-subtitle {
+        font-size: 13px;
+    }
+
+    nav,
+    .single-nav,
+    .admin-nav {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+
+    nav a,
+    .admin-nav button {
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
+
+    .container.card,
+    .card,
+    .auth-card {
+        padding: 16px;
+    }
+
+    .dashboard-shell {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .pvc-card,
+    .dashboard-panel,
+    .dashboard-top-card,
+    .dashboard-inner-panel {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .dashboard-top-card,
+    .dashboard-inner-panel {
+        padding: 14px;
+    }
+
+    .dashboard-top-card h2,
+    .panel-head h2 {
+        font-size: 20px;
+    }
+
+    .profile-row {
+        grid-template-columns: 1fr;
+    }
+
+    .doc-list {
+        grid-template-columns: 1fr;
+    }
+
+    .data-table {
+        min-width: 0;
+        table-layout: fixed;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 8px 6px;
+        font-size: 12px;
+        overflow-wrap: anywhere;
+    }
+}
+
+@media (max-width: 420px) {
+    .top-header,
+    nav,
+    .container,
+    .site-footer,
+    .portal-box {
+        width: min(100% - 14px, 1180px);
+    }
+
+    .service-tile,
+    .stat-tile,
+    .document-empty {
+        padding: 14px;
+    }
+
+    .button-row,
+    .pvc-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .button-row .btn,
+    .pvc-actions .btn,
+    .full-btn {
+        width: 100%;
+    }
+}
 -----------------------------------------------
