@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Status - Adarsh Cyber Zone</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+.status-card{
+    max-width:650px;
+    margin:60px auto;
+    background:#fff;
+    border-radius:15px;
+    padding:35px;
+    text-align:center;
+    box-shadow:0 5px 25px rgba(0,0,0,.15);
+}
+
+.status-icon{
+    font-size:70px;
+    margin-bottom:15px;
+}
+
+.status-title{
+    font-size:30px;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.status-text{
+    font-size:18px;
+    margin-bottom:30px;
+    line-height:1.6;
+}
+
+.btn-area{
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.btn-area a{
+    padding:12px 25px;
+    text-decoration:none;
+    border-radius:8px;
+    color:#fff;
+    font-weight:bold;
+}
+
+.green{
+    background:#28a745;
+}
+
+.blue{
+    background:#007bff;
+}
+</style>
+
+</head>
+<body>
+
+<header class="top-header">
+    <img src="logo.png">
+
+    <div>
+        <h1 class="brand-title">आदर्श साइबर ज़ोन & ग्राहक सेवा केन्द्र</h1>
+        <p class="brand-subtitle">
+            CSC | RTPS | Digital Services
+        </p>
+    </div>
+</header>
+
+<div class="status-card">
+
+<div class="status-icon" id="icon">⏳</div>
+
+<div class="status-title" id="title">
+Payment Processing...
+</div>
+
+<div class="status-text" id="msg">
+कृपया कुछ सेकंड प्रतीक्षा करें...
+</div>
+
+<div class="btn-area">
+
+<a href="login.html" class="green">
+Login
+</a>
+
+<a href="index.html" class="blue">
+Home
+</a>
+
+</div>
+
+</div>
+
+<footer class="site-footer">
+© 2026 Adarsh Cyber Zone
+</footer>
+
+<script>
+
+const params=new URLSearchParams(location.search);
+
+const status=(params.get("status")||"").toUpperCase();
+
+const icon=document.getElementById("icon");
+
+const title=document.getElementById("title");
+
+const msg=document.getElementById("msg");
+
+if(status==="SUCCESS"){
+
+icon.innerHTML="✅";
+
+title.innerHTML="Payment Successful";
+
+msg.innerHTML="आपका भुगतान सफल हो गया है।<br>यदि Webhook प्राप्त हो चुका है तो आपका प्रोफाइल कुछ ही सेकंड में स्वतः <b>ACTIVE</b> हो जाएगा।";
+
+}
+
+else if(status==="FAILED"){
+
+icon.innerHTML="❌";
+
+title.innerHTML="Payment Failed";
+
+msg.innerHTML="भुगतान सफल नहीं हो पाया। कृपया पुनः प्रयास करें।";
+
+}
+
+else{
+
+icon.innerHTML="⏳";
+
+title.innerHTML="Payment Processing";
+
+msg.innerHTML="यदि आपने अभी भुगतान किया है तो कृपया 20-30 सेकंड प्रतीक्षा करें। आपका प्रोफाइल स्वतः Active हो जाएगा।";
+
+}
+
+</script>
+
+</body>
+</html>

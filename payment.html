@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 <title>Payment - Adarsh Cyber Zone</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -32,8 +33,8 @@
 
 <main class="container">
         <section class="card auth-card payment-card">
-            <h2>Submit Payment Details</h2>
-            <div class="notice">UPI payment ke baad Transaction ID aur payment screenshot/slip upload karein.</div>
+            <h2>Profile Activation Payment</h2>
+            <div class="notice">₹100 प्रोफाइल एक्टिवेशन शुल्क का ऑनलाइन भुगतान करें। भुगतान सफल होते ही आपका प्रोफाइल स्वतः Active हो जाएगा।</div>
 
             <form id="paymentForm" novalidate>
                 <div class="form-grid">
@@ -46,18 +47,21 @@
                         <input type="text" id="payApplicantName" class="autoUpper" placeholder="APPLICANT NAME" required>
                     </div>
                     <div class="form-group">
-                        <label for="transactionId">* Transaction ID / UTR</label>
-                        <input type="text" id="transactionId" class="autoUpper" placeholder="UPI TRANSACTION ID" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="paymentSlip">* Payment Slip / Screenshot</label>
-                        <input type="file" id="paymentSlip" accept=".jpg,.jpeg,.png,.pdf" required>
-                        <small>JPG, PNG ya PDF file upload karein. Maximum size 5MB.</small>
-                    </div>
-                </div>
+    <label for="payMobile">* Mobile Number / मोबाइल नंबर</label>
+    <input type="tel"
+           id="payMobile"
+           maxlength="10"
+           placeholder="9876543210"
+           required>
+</div>
+ </div>
 
                 <div class="button-row">
-                    <button type="submit" class="btn btn-green" id="paymentSubmitBtn">Submit Payment</button>
+                   <button type="submit"
+class="btn btn-green"
+id="paymentSubmitBtn">
+💳 Submit & Pay ₹100
+</button>
                     <a class="btn btn-light" href="rtpscounter.html">Back to RTPS Counter</a>
                 </div>
                 <div id="paymentMsg"></div>
@@ -79,80 +83,148 @@
 <footer class="site-footer">&copy; 2026 Adarsh Cyber Zone</footer>
 <script src="script.js"></script>
 <script>
+
+const cashfree = Cashfree({
+    mode: "production"
+});
+
+
 let paymentSubmitting = false;
 
 function loadPaymentParams() {
     const params = new URLSearchParams(location.search);
+
     const regNo = params.get("regNo") || "";
     const name = params.get("name") || "";
+    const mobile = params.get("mobile") || "";
+
     if (regNo) $("payRegNo").value = regNo.toUpperCase();
     if (name) $("payApplicantName").value = name.toUpperCase();
+    if (mobile) $("payMobile").value = mobile;
 }
 
 function validatePaymentForm() {
+
     const regNo = $("payRegNo").value.trim().toUpperCase();
     const applicantName = $("payApplicantName").value.trim().toUpperCase();
-    const transactionId = $("transactionId").value.trim().toUpperCase();
-    const file = $("paymentSlip").files[0];
+    const mobile = $("payMobile").value.trim();
 
-    if (!/^ACZ\d{7}$/.test(regNo)) return "Registration No format sahi bharen.";
-    if (!applicantName) return "Applicant Name bharen.";
-    if (!transactionId) return "Transaction ID bharen.";
-    if (!file) return "Payment Slip upload karein.";
-    if (file.size > 5 * 1024 * 1024) return "Payment Slip 5MB se kam honi chahiye.";
-    if (!["jpg", "jpeg", "png", "pdf"].includes(file.name.split(".").pop().toLowerCase())) return "Payment Slip JPG, PNG ya PDF honi chahiye.";
+    if (!/^ACZ\d{7}$/.test(regNo))
+        return "Registration Number sahi bharen.";
+
+    if (!applicantName)
+        return "Applicant Name bharen.";
+
+    if (!/^[6-9]\d{9}$/.test(mobile))
+        return "10 digit Mobile Number bharen.";
+
     return null;
 }
 
 async function submitPayment() {
+
     if (paymentSubmitting) return;
+
     const error = validatePaymentForm();
+
     if (error) {
         showMessage("paymentMsg", error, true);
         return;
     }
 
     paymentSubmitting = true;
-    const restore = setButtonLoading($("paymentSubmitBtn"), "Submitting...");
-    const file = $("paymentSlip").files[0];
+
+    const restore = setButtonLoading(
+        $("paymentSubmitBtn"),
+        "Please Wait..."
+    );
+
     const data = {
-        action: "submitPayment",
+
+        action: "createPayment",
+
         RegNo: $("payRegNo").value.trim().toUpperCase(),
-        regNo: $("payRegNo").value.trim().toUpperCase(),
+
         ApplicantNmae: $("payApplicantName").value.trim().toUpperCase(),
-        applicantName: $("payApplicantName").value.trim().toUpperCase(),
-        TransactionId: $("transactionId").value.trim().toUpperCase(),
-        transactionId: $("transactionId").value.trim().toUpperCase(),
-        PaymentSlipLink: "",
-        paymentSlipBase64: await fileToBase64(file),
-        paymentSlipFileName: file.name
+
+        MobileNumber: $("payMobile").value.trim()
+
     };
 
     try {
+
         const result = await sendRequest(data);
-        if (!result.success) throw new Error(result.message || "Payment submit failed");
-        showMessage("paymentMsg", "Payment details submit ho gaya.", false, 0);
-        $("paymentForm").reset();
-    } catch (error) {
-        showMessage("paymentMsg", "Server error: " + error.message, true);
-    } finally {
-        restore();
-        paymentSubmitting = false;
+
+        if (!result.success)
+            throw new Error(result.message);
+
+       await cashfree.checkout({
+
+    paymentSessionId: result.paymentSessionId,
+
+    redirectTarget: "_self"
+
+});
+
     }
+
+    catch (err) {
+
+        showMessage(
+            "paymentMsg",
+            err.message,
+            true
+        );
+
+    }
+
+    finally {
+
+        restore();
+
+        paymentSubmitting = false;
+
+    }
+
 }
 
 window.addEventListener("DOMContentLoaded", () => {
+
     regNoFormat("payRegNo");
-    document.querySelectorAll(".autoUpper").forEach((field) => {
-        field.addEventListener("input", function () { this.value = this.value.toUpperCase(); });
+
+    document.querySelectorAll(".autoUpper").forEach(field => {
+
+        field.addEventListener("input", function () {
+
+            this.value = this.value.toUpperCase();
+
+        });
+
     });
+
     loadPaymentParams();
-    $("paymentForm").addEventListener("submit", (event) => {
-        event.preventDefault();
+
+    $("paymentForm").addEventListener("submit", function (e) {
+
+        e.preventDefault();
+
         const error = validatePaymentForm();
-        if (error) showMessage("paymentMsg", error, true);
-        else confirmAction("Do you want to submit this payment?", submitPayment);
+
+        if (error) {
+
+            showMessage("paymentMsg", error, true);
+
+            return;
+
+        }
+
+        confirmAction(
+            "₹100 का भुगतान जारी रखें?",
+            submitPayment
+        );
+
     });
+
 });
 </script>
 </body>

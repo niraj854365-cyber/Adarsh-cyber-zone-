@@ -1,4 +1,4 @@
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCq2xsdm-X911q64PtmrE2A92F14RrlRW7pRaZFmCi2pEa5_PjnWCSQN0l9TUYrBv1/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyyHUwAHYBfixmdZehLZL_dbp_q9b8bZMgt9L19uMv2ZhMjE3AldPN0OD0hOBnG9XuE/exec";
 
 const FALLBACK_LOGO = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23ffb703'/%3E%3Ctext x='50' y='64' font-size='38' text-anchor='middle' fill='%23064b85' font-family='Arial' font-weight='700'%3EACZ%3C/text%3E%3C/svg%3E";
 
