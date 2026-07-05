@@ -135,7 +135,7 @@ async function loadUserDashboard() {
     if (!savedUser) {
         location.href = "login.html";
         return;
-    }
+   }
     loggedUser = JSON.parse(savedUser);
     updateCard();
     await refreshFromServer();
