@@ -464,10 +464,6 @@ function generatePrintContent(data, regNo) {
         ["Email", data.Email],
         ["Present Address", data.FullPresentAddress],
         ["Permanent Address", data.FullPermanentAddress],
-        ["Photo File", data.photoFileName],
-        ["Signature File", data.signatureFileName],
-        ["Aadhaar File", data.aadhaarFileName],
-        ["Other Document File", data.otherDocumentFileName],
         ["Status", data.Status]
     ].map(([label, value]) => `<tr><td><strong>${escapeHtml(label)}</strong></td><td>${escapeHtml(value || "-")}</td></tr>`).join("");
     return `<div style="font-family:Arial;padding:24px"><h1>Adarsh Cyber Zone</h1><h2>Registration Receipt</h2><p><strong>Date:</strong> ${new Date().toLocaleDateString("hi-IN")}</p><table border="1" cellspacing="0" cellpadding="8" style="width:100%;border-collapse:collapse">${rows}</table></div>`;

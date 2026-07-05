@@ -41,17 +41,14 @@
             <div class="pvc-status" id="cardStatus">PENDING</div>
             <div class="pvc-actions">
                 <button type="button" class="btn btn-blue" onclick="showProfileView()">View Profile</button>
+                <button type="button" class="btn btn-blue" onclick="showCertificatesSection()">View Receipt / Certificate</button>
                 <button type="button" class="btn btn-green" onclick="showProfileEdit()">Edit Profile</button>
-                <button type="button" class="btn btn-light" onclick="printLatestReceipt()">Print Receipt</button>
+                <button type="button" class="btn btn-green" onclick="showRequestsSection()">Your Request</button>
+                <button type="button" class="btn btn-light pvc-action-wide" onclick="printLatestReceipt()">Print Receipt</button>
             </div>
         </aside>
 
-        <section class="dashboard-panel" id="dashboardPanel">
-            <section class="dashboard-top-card">
-                <h2>Certificates & Receipts</h2>
-                <div class="document-empty">Loading certificates...</div>
-            </section>
-        </section>
+        <section class="dashboard-panel" id="dashboardPanel"></section>
     </div>
 </main>
 
@@ -159,7 +156,7 @@ async function refreshFromServer() {
     requestsCache = requestResult.success && Array.isArray(requestResult.requests) ? requestResult.requests : [];
 }
 
-function certificatesTableSectionHtml() {
+function certificatesTableSectionHtml(showClose = false) {
     const docs = [...certificatesCache].reverse();
     const content = docs.length ? `
         <div class="table-wrap">
@@ -191,7 +188,11 @@ function certificatesTableSectionHtml() {
             </table>
         </div>
     ` : `<div class="document-empty">कोई certificate या receipt upload नहीं है।</div>`;
-    return `<section class="dashboard-top-card"><h2>Certificates & Receipts</h2>${content}</section>`;
+    return `<section class="dashboard-top-card">
+        <h2>Certificates & Receipts</h2>
+        ${content}
+        ${showClose ? `<div class="button-row bottom-close-row"><button type="button" class="btn btn-light" onclick="closePanel()">Close</button></div>` : ""}
+    </section>`;
 }
 
 function requestRemark(req) {
@@ -203,7 +204,7 @@ function requestRemark(req) {
     return "आपका request pending है।";
 }
 
-function requestsTableSectionHtml() {
+function requestsTableSectionHtml(showClose = false) {
     const requests = [...requestsCache].reverse();
     const table = requests.length ? `
         <div class="table-wrap">
@@ -241,14 +242,27 @@ function requestsTableSectionHtml() {
             <button type="button" class="btn btn-green" onclick="showRequestForm()">Send Request</button>
         </div>
         ${table}
+        ${showClose ? `<div class="button-row bottom-close-row"><button type="button" class="btn btn-light" onclick="closePanel()">Close</button></div>` : ""}
     </section>`;
 } 
 
-function renderDashboardPanel(content, options = {}) {
-    const showRequests = options.showRequests !== false;
-    $("dashboardPanel").innerHTML = content
-        ? `${certificatesTableSectionHtml()}${showRequests ? requestsTableSectionHtml() : ""}<section class="dashboard-inner-panel">${content}</section>`
-        : `${certificatesTableSectionHtml()}${requestsTableSectionHtml()}`;
+function renderDashboardPanel(content = "", options = {}) {
+    const sections = [
+        options.showCertificates ? certificatesTableSectionHtml(options.showClose) : "",
+        options.showRequests ? requestsTableSectionHtml(options.showClose) : "",
+        content ? `<section class="dashboard-inner-panel">${content}</section>` : ""
+    ].join("");
+    $("dashboardPanel").innerHTML = sections || "";
+}
+
+function showCertificatesSection() {
+    if (!window.confirm("Do you want to view receipts/certificates?")) return;
+    renderDashboardPanel("", { showCertificates: true, showClose: true });
+}
+
+function showRequestsSection() {
+    if (!window.confirm("Do you want to view your requests?")) return;
+    renderDashboardPanel("", { showRequests: true, showClose: true });
 }
 
 function showRequestForm() {
@@ -270,7 +284,7 @@ function showRequestForm() {
                 <button type="button" class="btn btn-light" onclick="closePanel()">Close</button>
             </div>
         </form>
-    `, { showRequests: false });
+    `);
     regNoFormat("requestRegNo");
     autoDOB("requestDob");
     onlyDigits("requestMobile", 10);
