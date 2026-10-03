@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://niraj854365-cyber.github.io/Adarsh-cyber-zone-/sitemap.xml

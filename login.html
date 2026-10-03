@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>User Login - Adarsh Cyber Zone</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top-header">
+    <img src="logo.png" alt="Adarsh Cyber Zone Logo">
+    <div>
+        <h1 class="brand-title">आदर्श साइबर ज़ोन & ग्राहक सेवा केन्द्र</h1>
+        <p class="brand-subtitle">CSC, RTPS, Digital Services और Online Form Support</p>
+    </div>
+</header>
+
+<nav>
+    <a href="register.html">Register</a>
+    <a href="login.html">Login</a>
+    <a href="knowregno.html">Know Reg No</a>
+    <a href="adminlogin.html">Admin Login</a>
+    <a href="payment.html"> Fee Payment</a>
+</nav>
+
+<main class="container">
+    <section class="card auth-card">
+        <h2>User Login</h2>
+
+        <label for="loginRegNo">Registration No. / Registered Mobile Number</label>
+        <input type="text" id="loginRegNo" maxlength="10" placeholder="ACZ0000001 or 9876543210" inputmode="text" autocomplete="username">
+
+        <label for="loginDob">DOB (DD-MM-YYYY)</label>
+        <input type="text" id="loginDob" placeholder="DD-MM-YYYY" maxlength="10">
+
+        <div class="button-row">
+            <button type="button" class="btn btn-green" onclick="userLogin(event)">Login</button>
+            <a class="btn btn-light" href="rtpscounter.html">Back to RTPS Counter</a>
+        </div>
+        <div id="loginMsg"></div>
+
+    </section>
+</main>
+
+<div class="modal-bg" id="confirmModal">
+    <div class="modal-box">
+        <h3>Confirmation</h3>
+        <p id="confirmText">Do you want to continue?</p>
+        <div class="modal-actions">
+            <button class="modal-yes" onclick="confirmYes()">Yes</button>
+            <button class="modal-no" onclick="confirmNo()">No</button>
+        </div>
+    </div>
+</div>
+
+<div class="login-wait-overlay" id="loginWaitOverlay" aria-live="polite" aria-hidden="true">
+    <div class="login-wait-loader" role="status" aria-label="Please wait">
+        <div class="login-wait-orbit"></div>
+        <div class="login-wait-button">PLEASE<br>WAIT</div>
+    </div>
+</div>
+
+<footer class="site-footer">&copy; 2026 Adarsh Cyber Zone</footer>
+<script src="script.js"></script>
+<script>
+async function userLogin(event) {
+    const loginIdentifier = $("loginRegNo").value.trim().toUpperCase();
+    const dob = $("loginDob").value.trim();
+    const isRegNoLogin = /^ACZ\d{7}$/.test(loginIdentifier);
+    const isMobileLogin = /^[6-9]\d{9}$/.test(loginIdentifier);
+    const regNo = isRegNoLogin ? loginIdentifier : "";
+    const mobileNumber = isMobileLogin ? loginIdentifier : "";
+
+    if (!loginIdentifier || !dob) {
+        showMessage("loginMsg", "Registration Number / Registered Mobile Number aur DOB bharen.", true);
+        return;
+    }
+
+    if (!isRegNoLogin && !isMobileLogin) {
+        showMessage("loginMsg", "ACZ0000001 या registered 10-digit mobile number भरें.", true);
+        return;
+    }
+
+    if (!validateDob(dob)) {
+        showMessage("loginMsg", "DOB DD-MM-YYYY format me bharen.", true);
+        return;
+    }
+
+    if (!window.confirm("Do you want to login?")) return;
+
+    const loginButton = event.target;
+    loginButton.disabled = true;
+    toggleLoginWait(true);
+
+    try {
+        const result = await sendRequest({
+            action: "getUser",
+            loginType: isRegNoLogin ? "REG_NO" : "MOBILE_NUMBER",
+            identifier: loginIdentifier,
+            regNo,
+            RegNo: regNo,
+            mobileNumber,
+            MobileNumber: mobileNumber,
+            dob,
+            DOB: dob
+        });
+
+        if (result.success && result.data) {
+            localStorage.setItem("loggedUser", JSON.stringify(result.data));
+            window.location.href = "userdashboard.html";
+        } else {
+            loginButton.disabled = false;
+            toggleLoginWait(false);
+            showMessage("loginMsg", result.message || "Galat Registration Number ya DOB.", true);
+        }
+    } catch (error) {
+        loginButton.disabled = false;
+        toggleLoginWait(false);
+        showMessage("loginMsg", "Server error: " + error.message, true);
+    }
+}
+
+function loginIdentifierFormat() {
+    const field = $("loginRegNo");
+    if (!field) return;
+    field.addEventListener("input", () => {
+        const value = field.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+        const isRegNoAttempt = value.startsWith("A") || value.startsWith("AC") || value.startsWith("ACZ");
+        field.value = isRegNoAttempt
+            ? value.slice(0, 3).replace(/[^ACZ]/g, "") + value.slice(3).replace(/\D/g, "").slice(0, 7)
+            : value.replace(/\D/g, "").slice(0, 10);
+    });
+}
+
+function toggleLoginWait(isVisible) {
+    const overlay = $("loginWaitOverlay");
+    if (!overlay) return;
+    overlay.classList.toggle("is-visible", isVisible);
+    overlay.setAttribute("aria-hidden", String(!isVisible));
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    loginIdentifierFormat();
+    autoDOB("loginDob");
+});
+</script>
+</body>
+</html>
