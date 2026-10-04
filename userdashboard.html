@@ -54,6 +54,21 @@
 </main>
 
 <footer class="site-footer">&copy; 2026 Adarsh Cyber Zone</footer>
+<div class="login-wait-overlay" id="profileUpdateOverlay" aria-live="polite" aria-hidden="true">
+    <div class="login-wait-loader" role="status" aria-label="Updating your profile">
+        <div class="login-wait-orbit"></div>
+        <div class="login-wait-button">UPDATING<br>YOUR PROFILE</div>
+    </div>
+</div>
+<div class="document-popout-overlay" id="documentPopoutOverlay" aria-hidden="true" onclick="if (event.target === this) closeDocumentPopout()">
+    <section class="document-popout" role="dialog" aria-modal="true" aria-labelledby="documentPopoutTitle">
+        <div class="document-popout-head">
+            <h2 id="documentPopoutTitle">Document Preview</h2>
+            <button type="button" class="document-popout-close" title="Close" aria-label="Close document preview" onclick="closeDocumentPopout()">&times;</button>
+        </div>
+        <iframe id="documentPopoutFrame" class="document-popout-frame" title="Document preview"></iframe>
+    </section>
+</div>
 <script src="script.js"></script>
 <script>
 let loggedUser = null;
@@ -73,13 +88,12 @@ const DASHBOARD_ADDRESS_PARTS = [
     ["PinCode", "पिन कोड / Pin Code", "Pin Code"]
 ];
 const USER_DOCUMENTS = [
-    { key: "photo", label: "Photo", linkKey: "PhotoLink", inputId: "editPhoto", slotId: "editPhotoPreview", base64Key: "photoBase64", fileNameKey: "photoFileName", removeKey: "removePhoto", accept: "image/jpeg,image/png" },
-    { key: "signature", label: "Signature", linkKey: "SignatureLink", inputId: "editSignature", slotId: "editSignaturePreview", base64Key: "signatureBase64", fileNameKey: "signatureFileName", removeKey: "removeSignature", accept: "image/jpeg,image/png" },
-    { key: "aadhaar", label: "Aadhaar Document", linkKey: "AadhaarLink", inputId: "editAadhaar", slotId: "editAadhaarPreview", base64Key: "aadhaarBase64", fileNameKey: "aadhaarFileName", removeKey: "removeAadhaar", accept: ".jpg,.jpeg,.png,.pdf" },
-    { key: "otherDocument", label: "Other Document", linkKey: "OtherDocumentLink", inputId: "editOtherDocument", slotId: "editOtherDocumentPreview", base64Key: "otherDocumentBase64", fileNameKey: "otherDocumentFileName", removeKey: "removeOtherDocument", accept: ".jpg,.jpeg,.png,.pdf" }
+    { key: "photo", label: "Photo", editLabel: "आवेदक का फोटो / Applicant's Photo (JPG/PNG, max 2MB)", linkKey: "PhotoLink", inputId: "editPhoto", slotId: "editPhotoPreview", base64Key: "photoBase64", fileNameKey: "photoFileName", accept: "image/jpeg,image/png" },
+    { key: "signature", label: "Signature", editLabel: "हस्ताक्षर / Signature (JPG/PNG, max 1MB)", linkKey: "SignatureLink", inputId: "editSignature", slotId: "editSignaturePreview", base64Key: "signatureBase64", fileNameKey: "signatureFileName", accept: "image/jpeg,image/png" },
+    { key: "aadhaar", label: "Aadhaar Document", editLabel: "आधार कार्ड / Aadhaar Card (JPG/PNG/PDF, max 3MB)", linkKey: "AadhaarLink", inputId: "editAadhaar", slotId: "editAadhaarPreview", base64Key: "aadhaarBase64", fileNameKey: "aadhaarFileName", accept: ".jpg,.jpeg,.png,.pdf" },
+    { key: "otherDocument", label: "Other Document", editLabel: "अन्य दस्तावेज / Other Document (optional, max 3MB)", linkKey: "OtherDocumentLink", inputId: "editOtherDocument", slotId: "editOtherDocumentPreview", base64Key: "otherDocumentBase64", fileNameKey: "otherDocumentFileName", accept: ".jpg,.jpeg,.png,.pdf" }
 ];
-let editDocumentRemovalKeys = new Set();
-let editDocumentPreviewUrls = {};
+let editDocumentPreviewUrls = [];
 
 function valueFrom(obj, ...keys) {
     for (const key of keys) if (obj?.[key]) return obj[key];
@@ -108,94 +122,80 @@ function driveThumbnailUrl(url, size = "w500") {
     return id ? `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=${size}` : (url || FALLBACK_LOGO);
 }
 
+function drivePreviewUrl(url) {
+    const id = driveFileId(url);
+    return id ? `https://drive.google.com/file/d/${encodeURIComponent(id)}/preview` : (url || "");
+}
+
 function profileRow(label, value) {
     return `<div class="profile-row"><div class="profile-label">${escapeHtml(label)}</div><div class="profile-value">${escapeHtml(value || "-")}</div></div>`;
 }
 
-function revokeEditDocumentPreviewUrl(slotId) {
-    const objectUrl = editDocumentPreviewUrls[slotId];
-    if (objectUrl) URL.revokeObjectURL(objectUrl);
-    delete editDocumentPreviewUrls[slotId];
+function resetEditDocumentPreviews() {
+    editDocumentPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+    editDocumentPreviewUrls = [];
 }
 
-function resetEditDocumentState() {
-    Object.keys(editDocumentPreviewUrls).forEach(revokeEditDocumentPreviewUrl);
-    editDocumentRemovalKeys.clear();
-}
-
-function documentPreviewMedia(config, url = "", file = null) {
-    if (file) {
-        revokeEditDocumentPreviewUrl(config.slotId);
-        const objectUrl = URL.createObjectURL(file);
-        editDocumentPreviewUrls[config.slotId] = objectUrl;
-        if (file.type === "application/pdf" || /\.pdf$/i.test(file.name)) {
-            return `<iframe class="file-preview-pdf" src="${objectUrl}" title="${escapeHtml(config.label)} PDF preview"></iframe>`;
-        }
-        return `<img class="file-preview-image" src="${objectUrl}" alt="${escapeHtml(config.label)} preview">`;
-    }
-
+function documentPreviewMedia(config, url = "") {
     if (!url) return "";
+    if (config.key === "aadhaar" || config.key === "otherDocument") {
+        return `<iframe class="file-preview-pdf" src="${escapeHtml(drivePreviewUrl(url))}" title="${escapeHtml(config.label)} PDF preview" loading="lazy"></iframe>`;
+    }
     const thumbnail = driveThumbnailUrl(url, "w500");
     return `<img class="file-preview-image" src="${escapeHtml(thumbnail)}" alt="${escapeHtml(config.label)} preview" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false;"><span class="file-preview-fallback" hidden>Preview unavailable</span>`;
 }
 
 function userDocumentCard(config, options = {}) {
     const url = options.url || "";
-    const file = options.file || null;
-    const hasDocument = Boolean(url || file);
-    if (!hasDocument) return "";
+    const hasDocument = Boolean(url);
+    if (!hasDocument) {
+        return options.showMissingMessage
+            ? `<figure class="file-preview"><div class="file-preview-media document-empty user-document-missing">अन्य दस्तावेज उपलब्ध नहीं है।</div><figcaption>${escapeHtml(config.label)}</figcaption></figure>`
+            : "";
+    }
     const download = options.download && url
         ? `<button type="button" class="file-preview-remove file-preview-download" title="Download ${escapeHtml(config.label)}" aria-label="Download ${escapeHtml(config.label)}" onclick="downloadUserDocument('${escapeHtml(config.label)}','${encodeURIComponent(url)}')">⬇</button>`
         : "";
-    const remove = options.removable && hasDocument
-        ? `<button type="button" class="file-preview-remove" title="Remove ${escapeHtml(config.label)}" aria-label="Remove ${escapeHtml(config.label)}" onclick="removeEditDocument('${config.key}')">×</button>`
+    const popout = options.popout && url && (config.key === "aadhaar" || config.key === "otherDocument")
+        ? `<button type="button" class="file-preview-remove file-preview-view" title="View ${escapeHtml(config.label)}" aria-label="View ${escapeHtml(config.label)}" onclick="openDocumentPopout('${escapeHtml(config.label)}','${encodeURIComponent(url)}')">&#128065;</button>`
         : "";
-    return `<figure class="file-preview"><div class="file-preview-media">${documentPreviewMedia(config, url, file)}${remove}${download}</div><figcaption>${escapeHtml(file?.name || config.label)}</figcaption></figure>`;
+    return `<figure class="file-preview"><div class="file-preview-media">${documentPreviewMedia(config, url)}${popout}${download}</div><figcaption>${escapeHtml(config.label)}</figcaption></figure>`;
 }
 
 function editDocumentField(config) {
-    return `<div class="form-group document-upload-group"><label for="${config.inputId}">${escapeHtml(config.label)}</label><input type="file" id="${config.inputId}" accept="${config.accept}"><div class="document-preview-slot" id="${config.slotId}" aria-live="polite">${userDocumentCard(config, { url: loggedUser[config.linkKey], removable: true })}</div></div>`;
+    return `<div class="form-group document-upload-group"><label for="${config.inputId}">${escapeHtml(config.editLabel)}</label><input type="file" id="${config.inputId}" accept="${config.accept}"><div class="document-preview-slot" id="${config.slotId}" aria-live="polite"></div></div>`;
 }
 
-function renderEditDocumentPreview(config) {
-    const slot = $(config.slotId);
-    if (!slot) return;
-    revokeEditDocumentPreviewUrl(config.slotId);
-    const file = $(config.inputId)?.files?.[0] || null;
-    const url = editDocumentRemovalKeys.has(config.key) ? "" : (loggedUser[config.linkKey] || "");
-    slot.innerHTML = userDocumentCard(config, { url, file: editDocumentRemovalKeys.has(config.key) ? null : file, removable: true });
+function renderEditDocumentPreviews() {
+    resetEditDocumentPreviews();
+    USER_DOCUMENTS.forEach((config) => {
+        const file = $(config.inputId)?.files?.[0];
+        const previewSlot = $(config.slotId);
+        if (!previewSlot) return;
+        previewSlot.innerHTML = "";
+        if (!file) return;
+
+        const previewUrl = URL.createObjectURL(file);
+        editDocumentPreviewUrls.push(previewUrl);
+        const media = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
+            ? `<iframe class="file-preview-pdf" src="${previewUrl}" title="${escapeHtml(config.label)} PDF preview"></iframe>`
+            : `<img class="file-preview-image" src="${previewUrl}" alt="${escapeHtml(config.label)} preview">`;
+        previewSlot.innerHTML = `<figure class="file-preview">
+            <div class="file-preview-media">
+                ${media}
+                <button type="button" class="file-preview-remove" title="Remove ${escapeHtml(config.label)}" aria-label="Remove ${escapeHtml(config.label)}" onclick="clearEditDocument('${config.key}')">×</button>
+            </div>
+            <figcaption>${escapeHtml(file.name)}</figcaption>
+        </figure>`;
+    });
 }
 
-async function removeEditDocument(key) {
+function clearEditDocument(key) {
     const config = USER_DOCUMENTS.find((document) => document.key === key);
-    const input = config && $(config.inputId);
-    if (!config || (!loggedUser[config.linkKey] && !input?.files?.[0])) return;
-    if (!window.confirm(`Do you want to remove ${config.label}?`)) return;
-    input.value = "";
-    if (!loggedUser[config.linkKey]) {
-        renderEditDocumentPreview(config);
-        return;
-    }
-    editDocumentRemovalKeys.add(config.key);
-    renderEditDocumentPreview(config);
-    try {
-        const result = await sendRequest({
-            action: "updateUserDocuments",
-            RegNo: currentRegNo(),
-            regNo: currentRegNo(),
-            [config.removeKey]: true
-        });
-        if (!result.success) throw new Error(result.message || "Document remove failed.");
-        loggedUser = { ...loggedUser, [config.linkKey]: "" };
-        localStorage.setItem("loggedUser", JSON.stringify(loggedUser));
-        editDocumentRemovalKeys.delete(config.key);
-        renderEditDocumentPreview(config);
-        window.alert("Document removed successfully.");
-    } catch (error) {
-        editDocumentRemovalKeys.delete(config.key);
-        renderEditDocumentPreview(config);
-        showMessage("dashboardMsg", error.message || "Document remove failed.", true);
-    }
+    const field = config && $(config.inputId);
+    if (!field) return;
+    field.value = "";
+    renderEditDocumentPreviews();
 }
 
 function allProfileRows() {
@@ -461,7 +461,12 @@ async function showProfileView(skipConfirm = false) {
         <div class="profile-box">${allProfileRows().map(([label, value]) => profileRow(label, value)).join("")}</div>
         <h3>Uploaded Documents</h3>
         <div class="user-document-grid">
-            ${USER_DOCUMENTS.map((document) => userDocumentCard(document, { url: loggedUser[document.linkKey], download: true })).join("")}
+            ${USER_DOCUMENTS.map((document) => userDocumentCard(document, {
+                url: loggedUser[document.linkKey],
+                download: true,
+                popout: true,
+                showMissingMessage: document.key === "otherDocument"
+            })).join("")}
         </div>
         <div class="button-row bottom-close-row">
             <button type="button" class="btn btn-light" onclick="closePanel()">Close</button>
@@ -471,6 +476,207 @@ async function showProfileView(skipConfirm = false) {
 
 function inputField(id, label, value, type = "text") {
     return `<div class="form-group"><label for="${id}">${escapeHtml(label)}</label><input type="${type}" id="${id}" value="${escapeHtml(value || "")}"></div>`;
+}
+
+const EDIT_HINDI_NAME_WORDS = {
+    ajay: "अजय", amit: "अमित", amita: "अमिता", amrita: "अमृता", anil: "अनिल", anita: "अनीता",
+    anjali: "अंजलि", anju: "अंजू", arun: "अरुण", aruna: "अरुणा", asha: "आशा", ashok: "अशोक",
+    aarti: "आरती", babita: "बबीता", bharat: "भारत", bharti: "भारती", deepa: "दीपा", deepak: "दीपक",
+    dev: "देव", devi: "देवी", divya: "दिव्या", geeta: "गीता", gita: "गीता", hemant: "हेमंत",
+    jagdish: "जगदीश", kalpana: "कल्पना", kamla: "कमला", kavita: "कविता", kirti: "कीर्ति", krishna: "कृष्ण",
+    laxmi: "लक्ष्मी", lakshmi: "लक्ष्मी", mahesh: "महेश", manisha: "मनीषा", manoj: "मनोज", meena: "मीना",
+    mohan: "मोहन", mukesh: "मुकेश", neha: "नेहा", niraj: "नीरज", pankaj: "पंकज", pooja: "पूजा",
+    pradeep: "प्रदीप", prasad: "प्रसाद", priyanka: "प्रियंका", raj: "राज", rajendra: "राजेन्द्र", rajesh: "राजेश",
+    rakesh: "राकेश", ram: "राम", ramesh: "रमेश", ravi: "रवि", ravindra: "रविन्द्र", rekha: "रेखा",
+    reena: "रीना", sandeep: "संदीप", sanjay: "संजय", santosh: "संतोष", sarita: "सरिता", savita: "सविता",
+    seema: "सीमा", shyam: "श्याम", shiv: "शिव", shiva: "शिवा", shivam: "शिवम", sunil: "सुनील",
+    sunita: "सुनीता", sushil: "सुशील", sushma: "सुषमा", vikas: "विकास", vijay: "विजय", vinod: "विनोद", vivek: "विवेक",
+    choudhary: "चौधरी", chaudhary: "चौधरी", das: "दास", gupta: "गुप्ता", jha: "झा", kumar: "कुमार",
+    kumari: "कुमारी", mandal: "मंडल", mahto: "महतो", mishra: "मिश्रा", pande: "पांडे", pandey: "पांडेय",
+    pandit: "पंडित", paswan: "पासवान", pathak: "पाठक", rai: "राय", roy: "रॉय", sahni: "साहनी",
+    sharma: "शर्मा", shobha: "शोभा", singh: "सिंह", sonu: "सोनू", sunny: "सनी", thakur: "ठाकुर",
+    tiwari: "तिवारी", verma: "वर्मा", yadav: "यादव"
+};
+const EDIT_EMAIL_FORMAT = /^(?!.*\.\.)[A-Za-z0-9](?:[A-Za-z0-9._%+-]{0,62}[A-Za-z0-9])?@gmail\.com$/i;
+
+function transliterateEditName(value) {
+    const words = String(value || "").toLowerCase().match(/[a-z]+|[^a-z]+/g) || [];
+    return words.map((part) => /^[a-z]+$/.test(part) ? transliterateEditWord(part) : part).join("").replace(/\s+/g, " ").trim();
+}
+
+function transliterateEditWord(word) {
+    const knownName = EDIT_HINDI_NAME_WORDS[word.toLowerCase()];
+    if (knownName) return knownName;
+    const vowels = {
+        aa: "आ", ai: "ऐ", au: "औ", ee: "ई", ii: "ई", oo: "ऊ", uu: "ऊ",
+        a: "अ", e: "ए", i: "इ", o: "ओ", u: "उ"
+    };
+    const vowelSigns = {
+        aa: "ा", ai: "ै", au: "ौ", ee: "ी", ii: "ी", oo: "ू", uu: "ू",
+        a: "", e: "े", i: "ि", o: "ो", u: "ु"
+    };
+    const consonants = {
+        ksh: "क्ष", gy: "ज्ञ", gya: "ज्ञ", shr: "श्र",
+        kh: "ख", gh: "घ", chh: "छ", ch: "च", jh: "झ", th: "थ", dh: "ध", ph: "फ", bh: "भ",
+        sh: "श", gn: "ज्ञ", tr: "त्र",
+        k: "क", g: "ग", c: "क", j: "ज", t: "त", d: "द", n: "न", p: "प", b: "ब",
+        m: "म", y: "य", r: "र", l: "ल", v: "व", w: "व", s: "स", h: "ह", f: "फ", q: "क", x: "क्स", z: "ज"
+    };
+    const vowelKeys = Object.keys(vowels).sort((a, b) => b.length - a.length);
+    const consonantKeys = Object.keys(consonants).sort((a, b) => b.length - a.length);
+    let out = "";
+    let index = 0;
+    while (index < word.length) {
+        const vowel = vowelKeys.find((key) => word.startsWith(key, index));
+        if (vowel) {
+            out += vowels[vowel];
+            index += vowel.length;
+            continue;
+        }
+        const consonant = consonantKeys.find((key) => word.startsWith(key, index));
+        if (!consonant) {
+            out += word[index];
+            index += 1;
+            continue;
+        }
+        out += consonants[consonant];
+        index += consonant.length;
+        const nextVowel = vowelKeys.find((key) => word.startsWith(key, index));
+        if (nextVowel) {
+            out += vowelSigns[nextVowel];
+            index += nextVowel.length;
+        } else if (index < word.length) {
+            out += "्";
+        }
+    }
+    return out;
+}
+
+function bindEditHindiAutoFill(englishId, hindiId) {
+    const english = $(englishId);
+    const hindi = $(hindiId);
+    if (!english || !hindi) return;
+    hindi.dataset.autoHindi = "1";
+    hindi.addEventListener("input", () => {
+        hindi.dataset.autoHindi = hindi.value.trim() ? "0" : "1";
+    });
+    english.addEventListener("input", () => {
+        if (hindi.dataset.autoHindi === "1") hindi.value = transliterateEditName(english.value);
+    });
+}
+
+function lockEditNameFieldScript(fieldId, script) {
+    const field = $(fieldId);
+    if (!field) return;
+    const allowedCharacters = script === "english"
+        ? /[^A-Za-z\s.'-]/g
+        : /[^\u0900-\u097F\s.'-]/g;
+    field.addEventListener("input", () => {
+        const cleanValue = field.value.replace(allowedCharacters, "");
+        if (field.value !== cleanValue) field.value = cleanValue;
+    }, true);
+}
+
+function makeEditFieldsUppercase(fieldIds) {
+    fieldIds.forEach((fieldId) => {
+        const field = $(fieldId);
+        if (!field) return;
+        field.addEventListener("input", () => {
+            field.value = field.value.toUpperCase();
+        });
+        field.value = field.value.toUpperCase();
+    });
+}
+
+function lockEditEmailFieldFormat() {
+    const email = $("editEmail");
+    if (!email) return;
+    const sanitizeEmail = () => {
+        const withoutInvalidCharacters = email.value
+            .replace(/\s/g, "")
+            .replace(/[^A-Za-z0-9._%+@-]/g, "");
+        const firstAt = withoutInvalidCharacters.indexOf("@");
+        const cleanValue = firstAt === -1
+            ? withoutInvalidCharacters
+            : `${withoutInvalidCharacters.slice(0, firstAt + 1)}${withoutInvalidCharacters.slice(firstAt + 1).replace(/@/g, "")}`;
+        email.value = cleanValue;
+        const isInvalid = Boolean(cleanValue) && !EDIT_EMAIL_FORMAT.test(cleanValue);
+        email.dataset.invalidEmail = isInvalid ? "1" : "0";
+        email.setCustomValidity(isInvalid ? "Enter a valid Gmail address." : "");
+    };
+    email.addEventListener("input", sanitizeEmail);
+    email.addEventListener("blur", () => {
+        const value = email.value.trim();
+        if (value && !EDIT_EMAIL_FORMAT.test(value)) {
+            email.dataset.invalidEmail = "1";
+            email.value = "";
+            email.setCustomValidity("Enter a valid Gmail address.");
+            showMessage("dashboardMsg", "सही Gmail Address भरें, जैसे name@gmail.com", true);
+        }
+    });
+    sanitizeEmail();
+}
+
+function validateEditDocument(config, maxMb, types) {
+    const file = $(config.inputId)?.files?.[0];
+    if (!file) return null;
+    if (file.size > maxMb * 1024 * 1024) return `${config.label} ${maxMb}MB से कम होना चाहिए।`;
+    const extension = file.name.split(".").pop().toLowerCase();
+    if (!types.includes(extension)) return `${config.label} का file type सही नहीं है।`;
+    return null;
+}
+
+function validateEditProfile() {
+    if ($("editSameAsPermanent").checked) syncEditPresentAddress();
+    const required = [
+        ["editApplicantEng", "Applicant Name"], ["editFatherEng", "Father Name"], ["editMotherEng", "Mother Name"],
+        ["editMarital", "Marital Status"], ["editDob", "DOB"], ["editGender", "Gender"], ["editCasteCategory", "Caste Category"],
+        ["editCasteName", "Caste Name"], ["editProfession", "Profession"], ["editIncome", "Annual Income"], ["editMobile", "Mobile Number"],
+        ...DASHBOARD_ADDRESS_PARTS.map(([key]) => [`editPermanent${key}`, `Permanent ${key}`])
+    ];
+    if (!$("editSameAsPermanent").checked) {
+        required.push(...DASHBOARD_ADDRESS_PARTS.map(([key]) => [`editPresent${key}`, `Present ${key}`]));
+    }
+    for (const [fieldId, label] of required) {
+        if (!$(fieldId)?.value.trim()) return `${label} Enter करें।`;
+    }
+    if (!validateDob($("editDob").value.trim())) return "DOB DD-MM-YYYY format में भरें।";
+    if (!/^[6-9]\d{9}$/.test($("editMobile").value.trim())) return "Mobile Number 10 digits का और 6-9 से शुरू होना चाहिए।";
+    for (const prefix of ["editPermanent", "editPresent"]) {
+        if (!/^\d{6}$/.test($(prefix + "PinCode").value.trim())) return `${prefix === "editPermanent" ? "Permanent" : "Present"} Pin Code 6 digits का होना चाहिए।`;
+        if (!/^\d{1,3}$/.test($(prefix + "WardNo").value.trim())) return `${prefix === "editPermanent" ? "Permanent" : "Present"} Ward No केवल 1 से 3 अंक में भरें।`;
+    }
+    const email = $("editEmail").value.trim();
+    if ($("editEmail").dataset.invalidEmail === "1" || (email && !EDIT_EMAIL_FORMAT.test(email))) return "Email सही भरें।";
+    if (Number($("editIncome").value) <= 0) return "Annual Income सही भरें।";
+
+    return validateEditDocument(USER_DOCUMENTS[0], 2, ["jpg", "jpeg", "png"]) ||
+        validateEditDocument(USER_DOCUMENTS[1], 1, ["jpg", "jpeg", "png"]) ||
+        validateEditDocument(USER_DOCUMENTS[2], 3, ["jpg", "jpeg", "png", "pdf"]) ||
+        validateEditDocument(USER_DOCUMENTS[3], 3, ["jpg", "jpeg", "png", "pdf"]);
+}
+
+function configureEditProfileSecurity() {
+    const englishNameFields = ["editApplicantEng", "editFatherEng", "editMotherEng", "editHusbandEng"];
+    const hindiNameFields = ["editApplicantHindi", "editFatherHindi", "editMotherHindi", "editHusbandHindi"];
+    englishNameFields.forEach((fieldId) => lockEditNameFieldScript(fieldId, "english"));
+    hindiNameFields.forEach((fieldId) => lockEditNameFieldScript(fieldId, "hindi"));
+    makeEditFieldsUppercase([
+        ...englishNameFields,
+        "editCasteName",
+        ...DASHBOARD_ADDRESS_PARTS.flatMap(([key]) => [`editPermanent${key}`, `editPresent${key}`])
+    ]);
+    autoDOB("editDob");
+    onlyDigits("editMobile", 10);
+    onlyDigits("editIncome", 8);
+    ["editPermanentPinCode", "editPresentPinCode"].forEach((fieldId) => onlyDigits(fieldId, 6));
+    ["editPermanentWardNo", "editPresentWardNo"].forEach((fieldId) => onlyDigits(fieldId, 3));
+    lockEditEmailFieldFormat();
+    [...englishNameFields, ...hindiNameFields].forEach((fieldId) => $(fieldId)?.dispatchEvent(new Event("input")));
+    bindEditHindiAutoFill("editApplicantEng", "editApplicantHindi");
+    bindEditHindiAutoFill("editFatherEng", "editFatherHindi");
+    bindEditHindiAutoFill("editMotherEng", "editMotherHindi");
+    bindEditHindiAutoFill("editHusbandEng", "editHusbandHindi");
 }
 
 function parseDashboardAddress(fullAddress) {
@@ -494,9 +700,11 @@ function parseDashboardAddress(fullAddress) {
 function editAddressFields(prefix, fullAddress, present = false) {
     const values = parseDashboardAddress(fullAddress);
     return DASHBOARD_ADDRESS_PARTS.map(([key, label, savedLabel]) => {
-        const maxLength = key === "PinCode" ? " maxlength=\"6\"" : "";
+        const maxLength = key === "PinCode" ? " maxlength=\"6\"" : key === "WardNo" ? " maxlength=\"3\"" : "";
+        const inputMode = key === "PinCode" || key === "WardNo" ? " inputmode=\"numeric\"" : "";
         const presentClass = present ? " edit-present-address" : "";
-        return `<div class="form-group"><label for="${prefix}${key}">${escapeHtml(label)}</label><input type="text" id="${prefix}${key}" class="${presentClass.trim()}" value="${escapeHtml(values[savedLabel] || "")}"${maxLength}></div>`;
+        const textClass = key === "PinCode" || key === "WardNo" ? "" : " autoUpper";
+        return `<div class="form-group"><label for="${prefix}${key}">${escapeHtml(label)}</label><input type="text" id="${prefix}${key}" class="${`${presentClass}${textClass}`.trim()}" value="${escapeHtml(values[savedLabel] || "")}"${maxLength}${inputMode}></div>`;
     }).join("");
 }
 
@@ -523,7 +731,7 @@ function selectField(id, label, value, options) {
 
 async function showProfileEdit(skipConfirm = false) {
     if (!skipConfirm && !window.confirm("Do you want to edit this profile?")) return;
-    resetEditDocumentState();
+    resetEditDocumentPreviews();
     saveDashboardPanelState("profile-edit");
     await runDashboardAction(() => {
         renderDashboardPanel(`
@@ -563,21 +771,21 @@ async function showProfileEdit(skipConfirm = false) {
             </div>
         </form>
         `);
-        onlyDigits("editMobile", 10);
-        onlyDigits("editIncome", 8);
-        autoDOB("editDob");
+        configureEditProfileSecurity();
         $("editSameAsPermanent").addEventListener("change", syncEditPresentAddress);
         DASHBOARD_ADDRESS_PARTS.forEach(([key]) => $("editPermanent" + key).addEventListener("input", syncEditPresentAddress));
-        USER_DOCUMENTS.forEach((document) => $(document.inputId).addEventListener("change", () => {
-            editDocumentRemovalKeys.delete(document.key);
-            renderEditDocumentPreview(document);
-        }));
+        USER_DOCUMENTS.forEach((document) => $(document.inputId).addEventListener("change", renderEditDocumentPreviews));
         $("profileEditForm").addEventListener("submit", saveFullProfile);
     });
 }
 
 async function saveFullProfile(event) {
     event.preventDefault();
+    const validationError = validateEditProfile();
+    if (validationError) {
+        showMessage("dashboardMsg", validationError, true);
+        return;
+    }
     if (!window.confirm("Do you want to update this profile?")) return;
     const updateData = {
         action: "updateProfile",
@@ -606,35 +814,46 @@ async function saveFullProfile(event) {
     updateData.ApplicantNameEng = updateData.ApplicantNmaeEng;
     const submitButton = event.target.querySelector("button[type='submit']");
     const restore = setButtonLoading(submitButton, "Saving...");
-    const profileResult = await sendRequest(updateData);
-    if (!profileResult.success) {
-        restore();
-        showMessage("dashboardMsg", profileResult.message || "Profile update failed.", true);
-        return;
-    }
-    const docData = await collectDocumentUpdates();
-    if (Object.keys(docData).length > 0) {
-        const docResult = await sendRequest({ action: "updateUserDocuments", RegNo: currentRegNo(), regNo: currentRegNo(), ...docData });
-        if (!docResult.success) {
-            restore();
-            showMessage("dashboardMsg", docResult.message || "Documents update failed.", true);
+    toggleProfileUpdateWait(true);
+    try {
+        const profileResult = await sendRequest(updateData);
+        if (!profileResult.success) {
+            showMessage("dashboardMsg", profileResult.message || "Profile update failed.", true);
             return;
         }
+        const docData = await collectDocumentUpdates();
+        if (Object.keys(docData).length > 0) {
+            const docResult = await sendRequest({ action: "updateUserDocuments", RegNo: currentRegNo(), regNo: currentRegNo(), ...docData });
+            if (!docResult.success) {
+                showMessage("dashboardMsg", docResult.message || "Documents update failed.", true);
+                return;
+            }
+        }
+        loggedUser = { ...loggedUser, ...updateData };
+        localStorage.setItem("loggedUser", JSON.stringify(loggedUser));
+        restore();
+        toggleProfileUpdateWait(false);
+        window.alert("Profile update successful.");
+        await refreshFromServer();
+        resetEditDocumentPreviews();
+        showProfileView(true);
+    } catch (error) {
+        showMessage("dashboardMsg", error.message || "Profile update failed.", true);
+    } finally {
+        restore();
+        toggleProfileUpdateWait(false);
     }
-    restore();
-    loggedUser = { ...loggedUser, ...updateData };
-    localStorage.setItem("loggedUser", JSON.stringify(loggedUser));
-    await refreshFromServer();
-    resetEditDocumentState();
-    showProfileView(true);
-    window.alert("Profile update successful.");
+}
+
+function toggleProfileUpdateWait(isVisible) {
+    const overlay = $("profileUpdateOverlay");
+    if (!overlay) return;
+    overlay.classList.toggle("is-visible", isVisible);
+    overlay.setAttribute("aria-hidden", String(!isVisible));
 }
 
 async function collectDocumentUpdates() {
     const output = {};
-    USER_DOCUMENTS.forEach((document) => {
-        if (editDocumentRemovalKeys.has(document.key)) output[document.removeKey] = true;
-    });
     await Promise.all(USER_DOCUMENTS.filter((document) => $(document.inputId).files[0]).map(async (document) => {
         const file = $(document.inputId).files[0];
         output[document.base64Key] = await fileToBase64(file);
@@ -646,6 +865,27 @@ async function collectDocumentUpdates() {
 function downloadUserDocument(label, encodedUrl) {
     if (!encodedUrl) return;
     downloadEncodedDriveFile(encodedUrl, `${currentRegNo()}_${label}`);
+}
+
+function openDocumentPopout(label, encodedUrl) {
+    const url = decodeURIComponent(encodedUrl || "");
+    const overlay = $("documentPopoutOverlay");
+    const title = $("documentPopoutTitle");
+    const frame = $("documentPopoutFrame");
+    if (!url || !overlay || !title || !frame) return;
+    title.textContent = label;
+    frame.src = drivePreviewUrl(url);
+    overlay.classList.add("is-visible");
+    overlay.setAttribute("aria-hidden", "false");
+}
+
+function closeDocumentPopout() {
+    const overlay = $("documentPopoutOverlay");
+    const frame = $("documentPopoutFrame");
+    if (!overlay || !frame) return;
+    overlay.classList.remove("is-visible");
+    overlay.setAttribute("aria-hidden", "true");
+    frame.src = "about:blank";
 }
 
 async function deleteCertificateDocument(encodedLink) {
@@ -675,7 +915,7 @@ async function printLatestReceipt() {
 }
 
 function closePanel() {
-    resetEditDocumentState();
+    resetEditDocumentPreviews();
     sessionStorage.removeItem(DASHBOARD_PANEL_STATE_KEY);
     renderDashboardPanel("");
 }

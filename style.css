@@ -917,9 +917,21 @@ small {
 
 .user-document-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, 192px);
-    gap: 16px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    align-items: start;
     margin: 10px 0 16px;
+}
+
+.user-document-grid .file-preview {
+    width: 100%;
+    max-width: 150px;
+}
+
+.user-document-grid .file-preview-media {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
 }
 
 .file-preview-fallback {
@@ -934,6 +946,22 @@ small {
     text-align: center;
 }
 
+.file-preview-fallback[hidden] {
+    display: none;
+}
+
+.user-document-missing {
+    display: grid;
+    width: 100%;
+    max-width: 150px;
+    min-height: 0;
+    margin: 0;
+    place-items: center;
+    padding: 12px;
+    aspect-ratio: 1;
+    text-align: center;
+}
+
 .file-preview-download {
     top: auto;
     right: 5px;
@@ -944,6 +972,85 @@ small {
 
 .file-preview-download:hover {
     background: var(--primary-dark);
+}
+
+.file-preview-view {
+    top: auto;
+    right: auto;
+    bottom: 5px;
+    left: 5px;
+    background: var(--green);
+    font-size: 16px;
+}
+
+.file-preview-view:hover {
+    background: #0f6c3a;
+}
+
+.document-popout-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1300;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(7, 20, 39, 0.7);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 160ms ease, visibility 160ms ease;
+}
+
+.document-popout-overlay.is-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.document-popout {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    width: min(920px, 100%);
+    height: min(760px, calc(100vh - 40px));
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: #ffffff;
+    box-shadow: var(--shadow);
+}
+
+.document-popout-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+}
+
+.document-popout-head h2 {
+    color: var(--primary-dark);
+    font-size: 18px;
+}
+
+.document-popout-close {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: var(--red);
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 25px;
+    line-height: 1;
+}
+
+.document-popout-frame {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    border: 0;
+    background: #ffffff;
 }
 
 .filter-buttons {
